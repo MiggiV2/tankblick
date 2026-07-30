@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Backup and device-transfer rules for API 31+.
+
+    The API key store is excluded from both: it is encrypted with a
+    non-exportable Android Keystore key bound to the original device, so the
+    ciphertext is worthless elsewhere and there is no reason to copy it off the
+    device. The user re-enters the key after a restore.
+-->
+<data-extraction-rules>
+    <cloud-backup>
+        <exclude
+            domain="file"
+            path="datastore/tankblick_secrets.preferences_pb" />
+    </cloud-backup>
+    <device-transfer>
+        <exclude
+            domain="file"
+            path="datastore/tankblick_secrets.preferences_pb" />
+    </device-transfer>
+</data-extraction-rules>

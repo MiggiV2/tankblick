@@ -1,0 +1,9 @@
+<resources>
+    <!--
+        Compose draws the whole UI, so this platform theme only has to provide a
+        sane window background and no ActionBar. Real colors live in
+        ui/theme/Theme.kt. The parent is a framework theme on purpose: the
+        com.google.android.material View library is not a dependency of this app.
+    -->
+    <style name="Theme.Tankblick" parent="android:Theme.Material.Light.NoActionBar" />
+</resources>

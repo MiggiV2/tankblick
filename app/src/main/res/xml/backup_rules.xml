@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Backup rules for API < 31.
+
+    The API key store is excluded on purpose: its contents are encrypted with a
+    non-exportable Android Keystore key that only exists on the original device,
+    so a restored copy would be undecryptable anyway - and shipping the
+    ciphertext to Google's backup servers has no upside for the user.
+
+    Favourites and settings are backed up so a device change keeps them.
+-->
+<full-backup-content>
+    <exclude
+        domain="file"
+        path="datastore/tankblick_secrets.preferences_pb" />
+</full-backup-content>

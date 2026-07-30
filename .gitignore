@@ -1,0 +1,30 @@
+*.iml
+.gradle
+.kotlin
+/local.properties
+/.idea/caches
+/.idea/libraries
+/.idea/modules.xml
+/.idea/workspace.xml
+/.idea/navEditor.xml
+/.idea/assetWizardSettings.xml
+.DS_Store
+/build
+/captures
+.externalNativeBuild
+.cxx
+local.properties
+
+# Build output
+build/
+
+# Signing material and anything that could carry a real Tankerkoenig API key.
+# The key is a per-user secret and must never end up in this repository.
+*.jks
+*.keystore
+keystore.properties
+signing.properties
+secrets.properties
+
+# IDE project files - not needed to build, and they leak local paths.
+/.idea/

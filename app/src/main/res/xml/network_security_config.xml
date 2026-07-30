@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Tankblick talks to exactly one host over TLS and to nothing else.
+    Cleartext is off everywhere, including for debug builds, so a
+    misconfigured URL fails loudly instead of leaking the user's
+    coordinates and API key in plaintext.
+-->
+<network-security-config>
+    <base-config cleartextTrafficPermitted="false">
+        <trust-anchors>
+            <certificates src="system" />
+        </trust-anchors>
+    </base-config>
+</network-security-config>

@@ -1,0 +1,6 @@
+<resources>
+    <string name="app_name">Tankblick</string>
+
+    <!-- Required by the CC BY 4.0 licence of the MTS-K price data. -->
+    <string name="attribution_short">Preisdaten: Tankerkönig / MTS-K, CC BY 4.0</string>
+</resources>
