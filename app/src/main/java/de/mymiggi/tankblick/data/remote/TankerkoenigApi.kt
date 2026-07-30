@@ -8,8 +8,6 @@ import de.mymiggi.tankblick.data.remote.dto.StationListResponseDto
 import de.mymiggi.tankblick.data.remote.dto.StationPriceDto
 import de.mymiggi.tankblick.data.remote.dto.StationSummaryDto
 import de.mymiggi.tankblick.domain.ApiKey
-import de.mymiggi.tankblick.domain.FuelType
-import de.mymiggi.tankblick.domain.SortMode
 import io.ktor.client.HttpClient
 import io.ktor.client.call.NoTransformationFoundException
 import io.ktor.client.call.body
@@ -43,14 +41,20 @@ class TankerkoenigApi(
     private val baseUrl: String = BASE_URL,
 ) {
 
-    /** Stations around a point, ordered by price or distance. */
+    /**
+     * Stations around a point, with all three prices, ordered by distance.
+     *
+     * The fuel type and the ordering are fixed rather than passed in, and both
+     * for the same reason. Asking for a single fuel makes the API answer with
+     * one "price" field instead of e5/e10/diesel, and `type=all` in turn only
+     * accepts `sort=dist`. Taking everything in one response is also what lets
+     * the user switch fuel without spending a request.
+     */
     suspend fun findNearby(
         apiKey: ApiKey,
         lat: Double,
         lng: Double,
         radiusKm: Int,
-        fuelType: FuelType,
-        sortMode: SortMode,
     ): ApiResult<List<StationSummaryDto>> {
         refreshLimiter.tryAcquire()?.let { return ApiResult.RateLimited(it) }
 
@@ -58,8 +62,8 @@ class TankerkoenigApi(
             parameter("lat", lat)
             parameter("lng", lng)
             parameter("rad", radiusKm.coerceIn(Settings.MIN_RADIUS_KM, Settings.MAX_RADIUS_KM))
-            parameter("type", fuelType.apiValue)
-            parameter("sort", sortMode.apiValue)
+            parameter("type", TYPE_ALL)
+            parameter("sort", SORT_BY_DISTANCE)
             parameter("apikey", apiKey.value)
         }.mapBody { it.stations }
     }
@@ -161,6 +165,9 @@ class TankerkoenigApi(
 
         /** Hard limit of prices.php. */
         const val MAX_IDS_PER_PRICE_REQUEST = 10
+
+        private const val TYPE_ALL = "all"
+        private const val SORT_BY_DISTANCE = "dist"
     }
 }
 

@@ -38,7 +38,7 @@ class StartupTasksTest {
         dao = database.stationDao()
         val client = HttpClient(MockEngine { respond("", HttpStatusCode.OK) })
         startupTasks = StartupTasks(
-            StationRepository(
+            DefaultStationRepository(
                 dao = dao,
                 api = TankerkoenigApi(client, RateLimiter(0L) { now }, RateLimiter(0L) { now }),
                 now = { now },

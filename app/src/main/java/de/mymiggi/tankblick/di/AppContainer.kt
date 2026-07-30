@@ -9,7 +9,10 @@ import de.mymiggi.tankblick.data.prefs.secretsDataStore
 import de.mymiggi.tankblick.data.prefs.settingsDataStore
 import de.mymiggi.tankblick.data.local.TankblickDatabase
 import de.mymiggi.tankblick.data.repo.StartupTasks
+import de.mymiggi.tankblick.data.repo.DefaultStationRepository
 import de.mymiggi.tankblick.data.repo.StationRepository
+import de.mymiggi.tankblick.location.LocationManagerSource
+import de.mymiggi.tankblick.location.LocationSource
 import de.mymiggi.tankblick.data.remote.RateLimiter
 import de.mymiggi.tankblick.data.remote.TankerkoenigApi
 import io.ktor.client.HttpClient
@@ -86,8 +89,10 @@ class AppContainer(context: Context) {
     private val database: TankblickDatabase by lazy { TankblickDatabase.create(appContext) }
 
     val stationRepository: StationRepository by lazy {
-        StationRepository(dao = database.stationDao(), api = tankerkoenigApi)
+        DefaultStationRepository(dao = database.stationDao(), api = tankerkoenigApi)
     }
 
     val startupTasks: StartupTasks by lazy { StartupTasks(stationRepository) }
+
+    val locationSource: LocationSource by lazy { LocationManagerSource(appContext) }
 }

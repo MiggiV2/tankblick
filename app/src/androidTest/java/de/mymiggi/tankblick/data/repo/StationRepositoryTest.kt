@@ -9,8 +9,6 @@ import de.mymiggi.tankblick.data.remote.ApiResult
 import de.mymiggi.tankblick.data.remote.RateLimiter
 import de.mymiggi.tankblick.data.remote.TankerkoenigApi
 import de.mymiggi.tankblick.domain.ApiKey
-import de.mymiggi.tankblick.domain.FuelType
-import de.mymiggi.tankblick.domain.SortMode
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.mock.MockEngine
 import io.ktor.client.engine.mock.respond
@@ -72,7 +70,7 @@ class StationRepositoryTest {
         val client = HttpClient(engine) {
             install(ContentNegotiation) { json(Json { ignoreUnknownKeys = true }) }
         }
-        return StationRepository(
+        return DefaultStationRepository(
             dao = dao,
             api = TankerkoenigApi(client, RateLimiter(0L) { now }, RateLimiter(0L) { now }),
             now = { now },
@@ -104,7 +102,7 @@ class StationRepositoryTest {
     fun refreshStoresTheResult() = runTest {
         val repo = repository(listBody(station("a"), station("b", dist = 2.0)))
 
-        val result = repo.refreshNearby(key, 52.5, 13.4, 5, FuelType.E10, SortMode.PRICE)
+        val result = repo.refreshNearby(key, 52.5, 13.4, 5)
 
         assertEquals(ApiResult.Success(2), result)
         val nearby = repo.observeNearby().first()
@@ -114,28 +112,28 @@ class StationRepositoryTest {
         assertEquals(now, nearby[0].fetchedAt)
     }
 
-    /** Ordering comes from the API, so it has to survive the round trip through SQLite. */
+    /** The API orders by distance, and that order has to survive SQLite. */
     @Test
     fun keepsTheOrderTheApiReturned() = runTest {
         val repo = repository(
             listBody(
-                station("cheap", e5 = "1.499"),
-                station("mid", e5 = "1.699"),
-                station("dear", e5 = "1.999"),
+                station("first", e5 = "1.499"),
+                station("second", e5 = "1.699"),
+                station("third", e5 = "1.999"),
             ),
         )
 
-        repo.refreshNearby(key, 52.5, 13.4, 5, FuelType.E5, SortMode.PRICE)
+        repo.refreshNearby(key, 52.5, 13.4, 5)
 
-        assertEquals(listOf("cheap", "mid", "dear"), repo.observeNearby().first().map { it.id })
+        assertEquals(listOf("first", "second", "third"), repo.observeNearby().first().map { it.id })
     }
 
     @Test
     fun aSecondRefreshReplacesTheFirst() = runTest {
         val repo = repository(listBody(station("a"), station("b")), listBody(station("c")))
 
-        repo.refreshNearby(key, 52.5, 13.4, 5, FuelType.E10, SortMode.PRICE)
-        repo.refreshNearby(key, 53.5, 14.4, 5, FuelType.E10, SortMode.PRICE)
+        repo.refreshNearby(key, 52.5, 13.4, 5)
+        repo.refreshNearby(key, 53.5, 14.4, 5)
 
         assertEquals(listOf("c"), repo.observeNearby().first().map { it.id })
     }
@@ -147,9 +145,9 @@ class StationRepositoryTest {
             listBody(station("a")),
             """{"ok":false,"status":"error","message":"parameter error"}""",
         )
-        repo.refreshNearby(key, 52.5, 13.4, 5, FuelType.E10, SortMode.PRICE)
+        repo.refreshNearby(key, 52.5, 13.4, 5)
 
-        val second = repo.refreshNearby(key, 52.5, 13.4, 5, FuelType.E10, SortMode.PRICE)
+        val second = repo.refreshNearby(key, 52.5, 13.4, 5)
 
         assertEquals(ApiResult.ApiError("parameter error"), second)
         assertEquals(listOf("a"), repo.observeNearby().first().map { it.id })
@@ -158,7 +156,7 @@ class StationRepositoryTest {
     @Test
     fun togglingAFavoriteAddsAndRemovesIt() = runTest {
         val repo = repository(listBody(station("a")))
-        repo.refreshNearby(key, 52.5, 13.4, 5, FuelType.E10, SortMode.PRICE)
+        repo.refreshNearby(key, 52.5, 13.4, 5)
 
         assertTrue(repo.toggleFavorite("a"))
         assertEquals(listOf("a"), repo.observeFavorites().first().map { it.id })
@@ -172,10 +170,10 @@ class StationRepositoryTest {
     @Test
     fun favoritesSurviveASearchSomewhereElse() = runTest {
         val repo = repository(listBody(station("home")), listBody(station("elsewhere")))
-        repo.refreshNearby(key, 52.5, 13.4, 5, FuelType.E10, SortMode.PRICE)
+        repo.refreshNearby(key, 52.5, 13.4, 5)
         repo.toggleFavorite("home")
 
-        repo.refreshNearby(key, 48.1, 11.5, 5, FuelType.E10, SortMode.PRICE)
+        repo.refreshNearby(key, 48.1, 11.5, 5)
 
         assertEquals(listOf("home"), repo.observeFavorites().first().map { it.id })
         assertEquals(listOf("elsewhere"), repo.observeNearby().first().map { it.id })
@@ -185,10 +183,10 @@ class StationRepositoryTest {
     @Test
     fun forgetsStationsThatAreNeitherNearbyNorFavorite() = runTest {
         val repo = repository(listBody(station("a"), station("b")), listBody(station("c")))
-        repo.refreshNearby(key, 52.5, 13.4, 5, FuelType.E10, SortMode.PRICE)
+        repo.refreshNearby(key, 52.5, 13.4, 5)
         repo.toggleFavorite("a")
 
-        repo.refreshNearby(key, 48.1, 11.5, 5, FuelType.E10, SortMode.PRICE)
+        repo.refreshNearby(key, 48.1, 11.5, 5)
 
         assertNotNull(repo.observeStation("a").first())
         assertNull(repo.observeStation("b").first())
@@ -201,7 +199,7 @@ class StationRepositoryTest {
             listBody(station("a")),
             """{"ok":true,"prices":{"a":{"status":"open","e5":1.111,"e10":1.222,"diesel":1.333}}}""",
         )
-        repo.refreshNearby(key, 52.5, 13.4, 5, FuelType.E10, SortMode.PRICE)
+        repo.refreshNearby(key, 52.5, 13.4, 5)
         repo.toggleFavorite("a")
         now += 60_000
 
@@ -232,7 +230,7 @@ class StationRepositoryTest {
             listBody(station("a")),
             """{"ok":true,"prices":{"a":{"status":"not found"}}}""",
         )
-        repo.refreshNearby(key, 52.5, 13.4, 5, FuelType.E10, SortMode.PRICE)
+        repo.refreshNearby(key, 52.5, 13.4, 5)
         repo.toggleFavorite("a")
 
         assertEquals(ApiResult.Success(0), repo.refreshFavorites(key))
@@ -246,7 +244,7 @@ class StationRepositoryTest {
             listBody(station("a")),
             """{"ok":true,"prices":{"a":{"status":"closed"}}}""",
         )
-        repo.refreshNearby(key, 52.5, 13.4, 5, FuelType.E10, SortMode.PRICE)
+        repo.refreshNearby(key, 52.5, 13.4, 5)
         repo.toggleFavorite("a")
 
         repo.refreshFavorites(key)
@@ -259,7 +257,7 @@ class StationRepositoryTest {
     @Test
     fun storesAFavoriteLabel() = runTest {
         val repo = repository(listBody(station("a")))
-        repo.refreshNearby(key, 52.5, 13.4, 5, FuelType.E10, SortMode.PRICE)
+        repo.refreshNearby(key, 52.5, 13.4, 5)
         repo.toggleFavorite("a")
 
         repo.setFavoriteLabel("a", "Zuhause")
@@ -270,7 +268,7 @@ class StationRepositoryTest {
     @Test
     fun treatsABlankLabelAsNoLabel() = runTest {
         val repo = repository(listBody(station("a")))
-        repo.refreshNearby(key, 52.5, 13.4, 5, FuelType.E10, SortMode.PRICE)
+        repo.refreshNearby(key, 52.5, 13.4, 5)
         repo.toggleFavorite("a")
         repo.setFavoriteLabel("a", "Zuhause")
 
@@ -282,10 +280,10 @@ class StationRepositoryTest {
     @Test
     fun purgesPriceHistoryOlderThanTheRetentionWindow() = runTest {
         val repo = repository(listBody(station("a")), listBody(station("a")))
-        repo.refreshNearby(key, 52.5, 13.4, 5, FuelType.E10, SortMode.PRICE)
+        repo.refreshNearby(key, 52.5, 13.4, 5)
 
         now += 31L * 24 * 60 * 60 * 1000
-        repo.refreshNearby(key, 52.5, 13.4, 5, FuelType.E10, SortMode.PRICE)
+        repo.refreshNearby(key, 52.5, 13.4, 5)
 
         // Three prices per refresh, two refreshes; only the recent three survive.
         assertEquals(3, repo.purgeOldSnapshots())

@@ -1,8 +1,6 @@
 package de.mymiggi.tankblick.data.remote
 
 import de.mymiggi.tankblick.domain.ApiKey
-import de.mymiggi.tankblick.domain.FuelType
-import de.mymiggi.tankblick.domain.SortMode
 import de.mymiggi.tankblick.fixture
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.mock.MockEngine
@@ -57,7 +55,7 @@ class TankerkoenigApiTest {
     fun `returns nearby stations`() = runTest {
         val api = api { jsonResponse(fixture("list_ok.json")) }
 
-        val result = api.findNearby(key, lat = 52.52, lng = 13.44, radiusKm = 5, fuelType = FuelType.E10, sortMode = SortMode.PRICE)
+        val result = api.findNearby(key, lat = 52.52, lng = 13.44, radiusKm = 5)
 
         val stations = (result as ApiResult.Success).value
         assertEquals(3, stations.size)
@@ -68,7 +66,7 @@ class TankerkoenigApiTest {
     fun `sends the parameters the api expects`() = runTest {
         val api = api { jsonResponse(fixture("list_ok.json")) }
 
-        api.findNearby(key, lat = 52.52, lng = 13.44, radiusKm = 5, fuelType = FuelType.DIESEL, sortMode = SortMode.DISTANCE)
+        api.findNearby(key, lat = 52.52, lng = 13.44, radiusKm = 5)
 
         val url = requests.single().url
         assertEquals("creativecommons.tankerkoenig.de", url.host)
@@ -76,9 +74,24 @@ class TankerkoenigApiTest {
         assertEquals("52.52", url.parameters["lat"])
         assertEquals("13.44", url.parameters["lng"])
         assertEquals("5", url.parameters["rad"])
-        assertEquals("diesel", url.parameters["type"])
-        assertEquals("dist", url.parameters["sort"])
         assertEquals(key.value, url.parameters["apikey"])
+    }
+
+    /**
+     * Two rules of this API push us to always ask for everything:
+     * with type=<fuel> the response carries a single "price" field instead of
+     * e5/e10/diesel, and type=all only accepts sort=dist. Asking for all three
+     * prices at once is also what makes switching fuel free of a request.
+     */
+    @Test
+    fun `always asks for all fuels sorted by distance`() = runTest {
+        val api = api { jsonResponse(fixture("list_ok.json")) }
+
+        api.findNearby(key, lat = 52.52, lng = 13.44, radiusKm = 5)
+
+        val url = requests.single().url
+        assertEquals("all", url.parameters["type"])
+        assertEquals("dist", url.parameters["sort"])
     }
 
     /** The API rejects anything above 25 km, so the app never asks for more. */
@@ -86,7 +99,7 @@ class TankerkoenigApiTest {
     fun `clamps the radius to what the api allows`() = runTest {
         val api = api { jsonResponse(fixture("list_ok.json")) }
 
-        api.findNearby(key, lat = 52.52, lng = 13.44, radiusKm = 400, fuelType = FuelType.E5, sortMode = SortMode.PRICE)
+        api.findNearby(key, lat = 52.52, lng = 13.44, radiusKm = 400)
 
         assertEquals("25", requests.single().url.parameters["rad"])
     }
@@ -96,7 +109,7 @@ class TankerkoenigApiTest {
     fun `recognises a rejected key inside a 200 response`() = runTest {
         val api = api { jsonResponse(fixture("error_bad_key.json")) }
 
-        val result = api.findNearby(key, 52.52, 13.44, 5, FuelType.E5, SortMode.PRICE)
+        val result = api.findNearby(key, 52.52, 13.44, 5)
 
         assertEquals(ApiResult.InvalidKey, result)
     }
@@ -114,7 +127,7 @@ class TankerkoenigApiTest {
     fun `maps a server error to its status code`() = runTest {
         val api = api { respondError(HttpStatusCode.ServiceUnavailable) }
 
-        val result = api.findNearby(key, 52.52, 13.44, 5, FuelType.E5, SortMode.PRICE)
+        val result = api.findNearby(key, 52.52, 13.44, 5)
 
         assertEquals(ApiResult.ServerError(503), result)
     }
@@ -123,7 +136,7 @@ class TankerkoenigApiTest {
     fun `maps a connection failure to offline`() = runTest {
         val api = api { throw IOException("no route to host") }
 
-        val result = api.findNearby(key, 52.52, 13.44, 5, FuelType.E5, SortMode.PRICE)
+        val result = api.findNearby(key, 52.52, 13.44, 5)
 
         assertEquals(ApiResult.Offline, result)
     }
@@ -132,7 +145,7 @@ class TankerkoenigApiTest {
     fun `maps an unparseable body to a malformed response`() = runTest {
         val api = api { jsonResponse("<html>maintenance</html>") }
 
-        val result = api.findNearby(key, 52.52, 13.44, 5, FuelType.E5, SortMode.PRICE)
+        val result = api.findNearby(key, 52.52, 13.44, 5)
 
         assertEquals(ApiResult.MalformedResponse, result)
     }
@@ -141,8 +154,8 @@ class TankerkoenigApiTest {
     fun `blocks a refresh that comes too soon and sends no request`() = runTest {
         val api = api(refreshIntervalMillis = 60_000L) { jsonResponse(fixture("list_ok.json")) }
 
-        api.findNearby(key, 52.52, 13.44, 5, FuelType.E5, SortMode.PRICE)
-        val second = api.findNearby(key, 52.52, 13.44, 5, FuelType.E5, SortMode.PRICE)
+        api.findNearby(key, 52.52, 13.44, 5)
+        val second = api.findNearby(key, 52.52, 13.44, 5)
 
         assertEquals(ApiResult.RateLimited(60L), second)
         assertEquals(1, requests.size)
@@ -247,7 +260,7 @@ class TankerkoenigApiTest {
     fun `never puts the api key in the url path`() = runTest {
         val api = api { jsonResponse(fixture("list_ok.json")) }
 
-        api.findNearby(key, 52.52, 13.44, 5, FuelType.E5, SortMode.PRICE)
+        api.findNearby(key, 52.52, 13.44, 5)
 
         assertNull(requests.single().url.encodedPath.takeIf { it.contains(key.value) })
     }
