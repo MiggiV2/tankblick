@@ -30,16 +30,29 @@ data class Station(
     /** Best label for a station, since not every record has a brand. */
     val displayName: String get() = brand.ifBlank { name }.ifBlank { place }
 
+    /**
+     * Street, number, post code and place, joined the German way.
+     *
+     * Every part is trimmed: the API happily sends "Margarete-Sommer-Str. "
+     * with a trailing space, which would otherwise show up as a double gap
+     * before the house number.
+     */
     val address: String
         get() = buildString {
-            append(street)
-            if (houseNumber.isNotBlank()) append(" ").append(houseNumber)
-            if (postCode.isNotBlank() || place.isNotBlank()) {
-                append(", ")
-                if (postCode.isNotBlank()) append(postCode).append(" ")
-                append(place)
+            append(street.trim())
+            val number = houseNumber.trim()
+            if (number.isNotEmpty()) {
+                if (isNotEmpty()) append(" ")
+                append(number)
             }
-        }.trim().trim(',')
+            val city = listOf(postCode.trim(), place.trim())
+                .filter { it.isNotEmpty() }
+                .joinToString(" ")
+            if (city.isNotEmpty()) {
+                if (isNotEmpty()) append(", ")
+                append(city)
+            }
+        }
 }
 
 /** Prices in euro per litre. `null` means the station reported none. */

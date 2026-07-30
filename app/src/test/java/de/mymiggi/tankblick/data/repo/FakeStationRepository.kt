@@ -18,6 +18,7 @@ class FakeStationRepository : StationRepository {
 
     var nearbyResult: ApiResult<Int> = ApiResult.Success(0)
     var favoritesResult: ApiResult<Int> = ApiResult.Success(0)
+    var detailResult: ApiResult<StationDetailDto> = ApiResult.MalformedResponse
 
     /** Every refreshNearby call, so tests can assert what was requested - and what was not. */
     val nearbyRequests = mutableListOf<NearbyRequest>()
@@ -50,7 +51,7 @@ class FakeStationRepository : StationRepository {
     override suspend fun refreshStationDetail(
         apiKey: ApiKey,
         stationId: String,
-    ): ApiResult<StationDetailDto> = ApiResult.MalformedResponse
+    ): ApiResult<StationDetailDto> = detailResult
 
     override suspend fun toggleFavorite(stationId: String): Boolean {
         val updated = nearby.value.map {

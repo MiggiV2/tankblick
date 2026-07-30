@@ -4,7 +4,6 @@ import android.content.Intent
 import android.provider.Settings
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -15,16 +14,11 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material.icons.outlined.FavoriteBorder
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -33,21 +27,18 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.clearAndSetSemantics
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import de.mymiggi.tankblick.R
-import de.mymiggi.tankblick.domain.Age
-import de.mymiggi.tankblick.domain.DistanceFormatter
 import de.mymiggi.tankblick.domain.FuelType
 import de.mymiggi.tankblick.domain.Prices
 import de.mymiggi.tankblick.domain.SortMode
 import de.mymiggi.tankblick.domain.Station
 import de.mymiggi.tankblick.location.LocationManagerSource
-import de.mymiggi.tankblick.ui.common.PriceText
+import de.mymiggi.tankblick.ui.common.DataFooter
+import de.mymiggi.tankblick.ui.common.MessageBanner
+import de.mymiggi.tankblick.ui.common.StationRow
 import de.mymiggi.tankblick.ui.theme.TankblickTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -60,7 +51,6 @@ fun NearbyScreen(
     onToggleFavorite: (String) -> Unit,
     onStationClick: (String) -> Unit,
     onDismissMessage: () -> Unit,
-    now: Long,
     modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
@@ -117,9 +107,7 @@ fun NearbyScreen(
                 HorizontalDivider()
             }
 
-            item {
-                Footer(lastUpdatedAt = uiState.lastUpdatedAt, now = now)
-            }
+            item { DataFooter(lastUpdatedAt = uiState.lastUpdatedAt) }
         }
     }
 }
@@ -157,131 +145,6 @@ private fun FuelAndSortControls(
 }
 
 @Composable
-private fun StationRow(
-    station: Station,
-    fuelType: FuelType,
-    onClick: () -> Unit,
-    onToggleFavorite: () -> Unit,
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(onClick = onClick)
-            .padding(start = 16.dp, top = 12.dp, bottom = 12.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
-    ) {
-        Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = station.favoriteLabel ?: station.displayName,
-                style = MaterialTheme.typography.titleMedium,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-            )
-            Text(
-                text = station.subtitle(),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-            )
-        }
-
-        PriceText(price = station.prices[fuelType])
-
-        IconButton(onClick = onToggleFavorite) {
-            Icon(
-                imageVector = if (station.isFavorite) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
-                contentDescription = stringResource(
-                    if (station.isFavorite) R.string.favorite_remove else R.string.favorite_add,
-                ),
-                tint = if (station.isFavorite) {
-                    MaterialTheme.colorScheme.primary
-                } else {
-                    MaterialTheme.colorScheme.onSurfaceVariant
-                },
-            )
-        }
-    }
-}
-
-@Composable
-private fun Station.subtitle(): String {
-    val distance = distanceKm?.let { DistanceFormatter.format(it) }
-    val status = stringResource(if (isOpen) R.string.station_open else R.string.station_closed)
-    return listOfNotNull(distance, status, place.takeIf { it.isNotBlank() })
-        .joinToString(" · ")
-}
-
-@Composable
-private fun MessageBanner(
-    message: NearbyMessage,
-    onDismiss: () -> Unit,
-    onRequestPermission: () -> Unit,
-    onOpenLocationSettings: () -> Unit,
-    onRetry: () -> Unit,
-) {
-    val isError = message !is NearbyMessage.NoResults
-
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = if (isError) {
-                MaterialTheme.colorScheme.errorContainer
-            } else {
-                MaterialTheme.colorScheme.secondaryContainer
-            },
-        ),
-    ) {
-        Column(
-            modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp),
-        ) {
-            Text(text = message.text(), style = MaterialTheme.typography.bodyMedium)
-
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                when (message) {
-                    NearbyMessage.NeedsLocationPermission -> TextButton(onClick = onRequestPermission) {
-                        Text(stringResource(R.string.action_grant_permission))
-                    }
-
-                    NearbyMessage.LocationDisabled -> TextButton(onClick = onOpenLocationSettings) {
-                        Text(stringResource(R.string.action_open_location_settings))
-                    }
-
-                    is NearbyMessage.RateLimited, NearbyMessage.MissingApiKey -> Unit
-
-                    else -> TextButton(onClick = onRetry) {
-                        Text(stringResource(R.string.action_retry))
-                    }
-                }
-                TextButton(onClick = onDismiss) {
-                    Text(stringResource(R.string.action_dismiss))
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun NearbyMessage.text(): String = when (this) {
-    NearbyMessage.MissingApiKey -> stringResource(R.string.message_missing_api_key)
-    NearbyMessage.NeedsLocationPermission -> stringResource(R.string.message_needs_location_permission)
-    NearbyMessage.LocationDisabled -> stringResource(R.string.message_location_disabled)
-    NearbyMessage.LocationUnavailable -> stringResource(R.string.message_location_unavailable)
-    NearbyMessage.NoResults -> stringResource(R.string.message_no_results)
-    NearbyMessage.Offline -> stringResource(R.string.message_offline)
-    NearbyMessage.InvalidKey -> stringResource(R.string.message_invalid_key)
-    is NearbyMessage.RateLimited ->
-        pluralStringResource(R.plurals.message_rate_limited, retryInSeconds.toInt(), retryInSeconds)
-    is NearbyMessage.ServerError -> stringResource(R.string.message_server_error, statusCode)
-    is NearbyMessage.Failed -> detail?.let { stringResource(R.string.message_failed_with_detail, it) }
-        ?: stringResource(R.string.message_failed)
-}
-
-@Composable
 private fun EmptyState(onRefresh: () -> Unit) {
     Column(
         modifier = Modifier
@@ -300,11 +163,7 @@ private fun EmptyState(onRefresh: () -> Unit) {
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )
         TextButton(onClick = onRefresh) {
-            Icon(
-                Icons.Filled.Refresh,
-                contentDescription = null,
-                modifier = Modifier.size(18.dp),
-            )
+            Icon(Icons.Filled.Refresh, contentDescription = null, modifier = Modifier.size(18.dp))
             Text(
                 text = stringResource(R.string.action_search_nearby),
                 modifier = Modifier.padding(start = 8.dp),
@@ -313,39 +172,7 @@ private fun EmptyState(onRefresh: () -> Unit) {
     }
 }
 
-@Composable
-private fun Footer(lastUpdatedAt: Long?, now: Long) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(4.dp),
-    ) {
-        lastUpdatedAt?.let {
-            Text(
-                text = stringResource(R.string.last_updated, Age.of(it, now).text()),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        }
-        Text(
-            text = stringResource(R.string.attribution_short),
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.clearAndSetSemantics { },
-        )
-    }
-}
-
-@Composable
-private fun Age.text(): String = when (this) {
-    Age.JustNow -> stringResource(R.string.age_just_now)
-    is Age.Minutes -> pluralStringResource(R.plurals.age_minutes, value, value)
-    is Age.Hours -> pluralStringResource(R.plurals.age_hours, value, value)
-    is Age.Days -> pluralStringResource(R.plurals.age_days, value, value)
-}
-
-private val FuelType.labelRes: Int
+internal val FuelType.labelRes: Int
     get() = when (this) {
         FuelType.E5 -> R.string.fuel_e5
         FuelType.E10 -> R.string.fuel_e10
@@ -377,7 +204,6 @@ private fun NearbyScreenPreview() {
             onToggleFavorite = {},
             onStationClick = {},
             onDismissMessage = {},
-            now = 11 * 60_000L,
         )
     }
 }

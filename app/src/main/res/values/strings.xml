@@ -34,6 +34,25 @@
     <string name="nearby_empty_title">Noch keine Tankstellen</string>
     <string name="nearby_empty_body">Starte eine Umkreissuche, um Preise in deiner Nähe zu sehen. Tankblick fragt nur dann Daten ab — nie im Hintergrund.</string>
 
+    <!-- Tabs and navigation -->
+    <string name="tab_nearby">In der Nähe</string>
+    <string name="tab_favorites">Favoriten</string>
+    <string name="action_back">Zurück</string>
+
+    <!-- Favorites -->
+    <string name="favorites_empty_title">Noch keine Favoriten</string>
+    <string name="favorites_empty_body">Tippe in der Liste auf das Herz, um eine Tankstelle zu merken. Favoriten lassen sich mit einer einzigen Abfrage aktualisieren — egal wie viele es sind.</string>
+
+    <!-- Detail -->
+    <string name="detail_unknown_station">Zu dieser Tankstelle liegen keine Daten vor.</string>
+    <string name="detail_opening_hours">Öffnungszeiten</string>
+    <string name="detail_opening_hours_loading">werden geladen …</string>
+    <string name="detail_opening_hours_unknown">Keine Öffnungszeiten hinterlegt.</string>
+    <string name="detail_open_all_day">Durchgehend geöffnet</string>
+    <string name="detail_label">Eigener Name</string>
+    <string name="detail_label_hint">Zum Beispiel „Zuhause" oder „Arbeit".</string>
+    <string name="action_navigate">Navigieren</string>
+
     <!-- Freshness -->
     <string name="last_updated">Stand: %1$s</string>
     <string name="age_just_now">gerade eben</string>

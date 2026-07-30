@@ -28,3 +28,6 @@ secrets.properties
 
 # IDE project files - not needed to build, and they leak local paths.
 /.idea/
+
+# Local research notes. Scratch material, not part of the app's documentation.
+/notes/
