@@ -7,6 +7,9 @@ import de.mymiggi.tankblick.data.prefs.ApiKeyStore
 import de.mymiggi.tankblick.data.prefs.SettingsStore
 import de.mymiggi.tankblick.data.prefs.secretsDataStore
 import de.mymiggi.tankblick.data.prefs.settingsDataStore
+import de.mymiggi.tankblick.data.local.TankblickDatabase
+import de.mymiggi.tankblick.data.repo.StartupTasks
+import de.mymiggi.tankblick.data.repo.StationRepository
 import de.mymiggi.tankblick.data.remote.RateLimiter
 import de.mymiggi.tankblick.data.remote.TankerkoenigApi
 import io.ktor.client.HttpClient
@@ -15,6 +18,9 @@ import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.UserAgent
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.serialization.kotlinx.json.json
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.serialization.json.Json
 
 /**
@@ -27,6 +33,9 @@ import kotlinx.serialization.json.Json
 class AppContainer(context: Context) {
 
     private val appContext = context.applicationContext
+
+    /** Outlives every screen; for work that belongs to the process, not a view. */
+    val applicationScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 
     val apiKeyStore: ApiKeyStore by lazy {
         ApiKeyStore(appContext.secretsDataStore, AndroidKeystoreCipher())
@@ -66,11 +75,19 @@ class AppContainer(context: Context) {
         }
     }
 
-    val tankerkoenigApi: TankerkoenigApi by lazy {
+    private val tankerkoenigApi: TankerkoenigApi by lazy {
         TankerkoenigApi(
             httpClient = httpClient,
             refreshLimiter = RateLimiter(RateLimiter.REFRESH_INTERVAL_MILLIS),
             detailLimiter = RateLimiter(RateLimiter.DETAIL_INTERVAL_MILLIS),
         )
     }
+
+    private val database: TankblickDatabase by lazy { TankblickDatabase.create(appContext) }
+
+    val stationRepository: StationRepository by lazy {
+        StationRepository(dao = database.stationDao(), api = tankerkoenigApi)
+    }
+
+    val startupTasks: StartupTasks by lazy { StartupTasks(stationRepository) }
 }

@@ -2,6 +2,7 @@ package de.mymiggi.tankblick
 
 import android.app.Application
 import de.mymiggi.tankblick.di.AppContainer
+import kotlinx.coroutines.launch
 
 /**
  * Owns the app-wide object graph. Dependency wiring is done by hand in
@@ -17,5 +18,11 @@ class TankblickApplication : Application() {
     override fun onCreate() {
         super.onCreate()
         container = AppContainer(this)
+
+        // Retention has to actually run, or "we only keep 30 days" is just a
+        // sentence in the README. Off the main thread, and never blocking start-up.
+        container.applicationScope.launch {
+            container.startupTasks.run()
+        }
     }
 }
