@@ -13,6 +13,7 @@ import de.mymiggi.tankblick.data.repo.DefaultStationRepository
 import de.mymiggi.tankblick.data.repo.StationRepository
 import de.mymiggi.tankblick.location.LocationManagerSource
 import de.mymiggi.tankblick.location.LocationSource
+import de.mymiggi.tankblick.navapp.NavAppLauncher
 import de.mymiggi.tankblick.data.remote.RateLimiter
 import de.mymiggi.tankblick.data.remote.TankerkoenigApi
 import io.ktor.client.HttpClient
@@ -95,4 +96,6 @@ class AppContainer(context: Context) {
     val startupTasks: StartupTasks by lazy { StartupTasks(stationRepository) }
 
     val locationSource: LocationSource by lazy { LocationManagerSource(appContext) }
+
+    val navAppLauncher: NavAppLauncher by lazy { NavAppLauncher(appContext) }
 }

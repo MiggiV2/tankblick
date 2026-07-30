@@ -7,6 +7,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -20,6 +21,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.lifecycle.compose.LifecycleResumeEffect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavDestination.Companion.hasRoute
@@ -40,6 +42,8 @@ import de.mymiggi.tankblick.ui.favorites.FavoritesViewModel
 import de.mymiggi.tankblick.ui.nearby.NearbyScreen
 import de.mymiggi.tankblick.ui.nearby.NearbyViewModel
 import de.mymiggi.tankblick.ui.onboarding.OnboardingScreen
+import de.mymiggi.tankblick.ui.settings.SettingsScreen
+import de.mymiggi.tankblick.ui.settings.SettingsViewModel
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -47,6 +51,9 @@ object NearbyRoute
 
 @Serializable
 object FavoritesRoute
+
+@Serializable
+object SettingsRoute
 
 @Serializable
 data class DetailRoute(val stationId: String)
@@ -114,6 +121,12 @@ private fun MainScaffold(
                         icon = { Icon(Icons.Filled.Favorite, contentDescription = null) },
                         label = { Text(stringResource(R.string.tab_favorites)) },
                     )
+                    NavigationBarItem(
+                        selected = currentDestination?.hasRoute<SettingsRoute>() == true,
+                        onClick = { navController.switchTab(SettingsRoute) },
+                        icon = { Icon(Icons.Filled.Settings, contentDescription = null) },
+                        label = { Text(stringResource(R.string.tab_settings)) },
+                    )
                 }
             }
         },
@@ -128,6 +141,9 @@ private fun MainScaffold(
             }
             composable<FavoritesRoute> {
                 FavoritesTab(onStationClick = { navController.navigate(DetailRoute(it)) })
+            }
+            composable<SettingsRoute> {
+                SettingsTab()
             }
             composable<DetailRoute> { entry ->
                 StationDetailPane(stationId = entry.toRoute<DetailRoute>().stationId)
@@ -176,6 +192,27 @@ private fun FavoritesTab(
         onToggleFavorite = viewModel::toggleFavorite,
         onStationClick = onStationClick,
         onDismissMessage = viewModel::dismissMessage,
+    )
+}
+
+@Composable
+private fun SettingsTab(
+    viewModel: SettingsViewModel = viewModel(factory = AppViewModelProvider.Factory),
+) {
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+
+    // Apps get installed and removed while the app sits in the background.
+    LifecycleResumeEffect(Unit) {
+        viewModel.refreshNavApps()
+        onPauseOrDispose {}
+    }
+
+    SettingsScreen(
+        uiState = uiState,
+        onRadiusChange = viewModel::setRadiusKm,
+        onNavAppChange = viewModel::setNavApp,
+        onReplaceApiKey = viewModel::replaceApiKey,
+        onForgetApiKey = viewModel::forgetApiKey,
     )
 }
 

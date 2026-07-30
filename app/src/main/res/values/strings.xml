@@ -1,5 +1,6 @@
-<resources>
-    <string name="app_name">Tankblick</string>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <!-- A proper noun, and a UUID pattern: neither is translated. -->
+    <string name="app_name" translatable="false">Tankblick</string>
 
     <!-- Required by the CC BY 4.0 licence of the MTS-K price data. -->
     <string name="attribution_short">Preisdaten: Tankerkönig / MTS-K, CC BY 4.0</string>
@@ -10,7 +11,7 @@
     <string name="onboarding_steps">1. Auf onboarding.tankerkoenig.de registrieren — Pflichtangaben sind Vorname, Nachname und E-Mail-Adresse.\n2. Der Key wird von Hand geprüft, das kann einige Tage dauern.\n3. Key hier eintragen.</string>
     <string name="onboarding_open_registration">Key beantragen</string>
     <string name="onboarding_key_label">API-Key</string>
-    <string name="onboarding_key_placeholder">00000000-0000-0000-0000-000000000000</string>
+    <string name="onboarding_key_placeholder" translatable="false" tools:ignore="TypographyDashes">00000000-0000-0000-0000-000000000000</string>
     <string name="onboarding_key_hint">Ein Key sieht aus wie eine UUID.</string>
     <string name="onboarding_key_invalid">Das sieht nicht nach einem Tankerkönig-Key aus. Erwartet wird eine UUID mit 36 Zeichen.</string>
     <string name="onboarding_save">Key speichern</string>
@@ -52,6 +53,33 @@
     <string name="detail_label">Eigener Name</string>
     <string name="detail_label_hint">Zum Beispiel „Zuhause" oder „Arbeit".</string>
     <string name="action_navigate">Navigieren</string>
+
+    <!-- Settings -->
+    <string name="tab_settings">Einstellungen</string>
+    <string name="settings_radius">Suchradius</string>
+    <plurals name="settings_radius_value">
+        <item quantity="one">%1$d Kilometer</item>
+        <item quantity="other">%1$d Kilometer</item>
+    </plurals>
+    <string name="settings_radius_hint">Tankerkönig erlaubt höchstens 25 km. Gilt ab der nächsten Suche.</string>
+    <string name="settings_nav_app">Navi-App</string>
+    <string name="settings_nav_app_ask">Jedes Mal fragen</string>
+    <string name="settings_nav_app_none">Es ist keine App installiert, die Navigation übernehmen kann. Organic Maps und OsmAnd gibt es bei F-Droid.</string>
+    <string name="settings_api_key">API-Key</string>
+    <string name="settings_api_key_none">Kein Key hinterlegt</string>
+    <string name="settings_api_key_demo">Das ist der Demo-Key. Er liefert Beispieldaten, keine echten Preise.</string>
+    <string name="settings_api_key_replace">Key ersetzen</string>
+    <string name="settings_api_key_forget">Key löschen</string>
+    <string name="settings_about">Über Tankblick</string>
+    <string name="settings_privacy_title">Datenschutz</string>
+    <string name="settings_privacy_body">Tankblick spricht mit genau einem Server: creativecommons.tankerkoenig.de. Kein Konto, kein Tracking, keine Analytics, keine Werbung.
+
+Dein Standort verlässt das Gerät nur als Koordinatenpaar in einer Umkreissuche, die du selbst auslöst — nie im Hintergrund. Der API-Key liegt verschlüsselt im Android-Keystore und ist vom Backup ausgenommen. Favoriten, Einstellungen und Preise bleiben lokal; Preisverlauf wird nach 30 Tagen gelöscht.</string>
+    <string name="settings_version">Version %1$s</string>
+    <string name="settings_licence">Tankblick steht unter der GPL-3.0-or-later.</string>
+    <string name="settings_open_tankerkoenig">Tankerkönig</string>
+    <string name="settings_open_licence">CC BY 4.0</string>
+    <string name="action_cancel">Abbrechen</string>
 
     <!-- Freshness -->
     <string name="last_updated">Stand: %1$s</string>

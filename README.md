@@ -4,7 +4,9 @@ Schnelle, datensparsame Spritpreis-App für Deutschland. Zeigt aktuelle Preise f
 E5, E10 und Diesel aus der [Tankerkönig-API](https://creativecommons.tankerkoenig.de/)
 (Daten der Markttransparenzstelle für Kraftstoffe des Bundeskartellamts).
 
-> **Status:** in Entwicklung. Aktuell steht das Projektgerüst (M0).
+> **Status:** in Entwicklung. Onboarding, Umkreissuche, Favoriten,
+> Detailansicht, Navigation und Einstellungen sind implementiert und getestet
+> (168 Unit-Tests, 26 instrumentierte Tests).
 
 ## Warum noch eine Tankpreis-App?
 
@@ -14,6 +16,31 @@ E5, E10 und Diesel aus der [Tankerkönig-API](https://creativecommons.tankerkoen
   auslöst — das schont Akku, Datenvolumen und die freie API.
 - **Freie Software**, gebaut für F-Droid: keine Google Play Services, keine
   proprietären SDKs, reproduzierbarer Build.
+
+## Funktionen
+
+- **Onboarding:** eigener Tankerkönig-API-Key oder der öffentliche Demo-Key.
+  Der Key wird als UUID validiert, AES-256-GCM-verschlüsselt im Android
+  Keystore abgelegt, in DataStore gespeichert und vom Backup ausgeschlossen.
+- **Umkreissuche:** Standort über `LocationManager` (keine Play Services),
+  Liste mit Preis, Entfernung und Öffnungsstatus, Filter-Chips für E5/E10/
+  Diesel, Sortierung nach Preis oder Entfernung. Sortierung und Filterwechsel
+  passieren lokal — dafür ist kein neuer Request nötig.
+- **Favoriten:** eigener Tab, in einer einzigen Anfrage aktualisiert (der
+  Client bündelt Stations-IDs in Zehnerpaketen, wie von der API verlangt).
+- **Detailansicht:** Adresse, alle drei Preise, Öffnungszeiten laut API,
+  Favoriten-Umschalter mit eigenem Label, Navigations-Button.
+- **Navigation** über einen einfachen `geo:`-Intent — entweder die in den
+  Einstellungen gewählte App oder der System-Dialog.
+- **Einstellungen:** Suchradius (1–25 km), Wahl der Navigations-App,
+  API-Key (maskiert, austauschbar, löschbar), Info-/Datenschutz-Abschnitt.
+- **Offline-first:** Room-Cache, jeder Bildschirm zeigt das Alter seiner
+  Daten, ein fehlgeschlagener Refresh leert den Cache nie, Preisverlauf wird
+  beim Start nach 30 Tagen bereinigt.
+- **Selbst auferlegtes Rate-Limiting:** 60 s zwischen Refreshes, 2 s Debounce
+  für Detailabfragen, Radius auf 25 km gedeckelt.
+- Deutsch ist die Standard-Locale (`values/`), Englisch liegt in
+  `values-en/`.
 
 ## Datenschutz
 
@@ -70,11 +97,20 @@ Ergebnis unter `app/build/outputs/apk/`.
 | HTTP | Ktor Client (OkHttp-Engine) + kotlinx.serialization |
 | Lokale Daten | Room (Favoriten, Cache, Preisverlauf), DataStore (Einstellungen) |
 | Standort | `android.location.LocationManager` — **kein** Google Play Services |
-| Build | AGP 9.3.1, Gradle 9.5, compileSdk 37, minSdk 24 |
+| Build | AGP 9.3.1, Gradle 9.5, compileSdk 37, minSdk 24, targetSdk 36 |
+
+Versionsstände im Detail: Compose BOM 2026.06.01, Material 3 1.4.0, Room 2.8.4
+(über KSP 2.3.10), Ktor 3.5.1, DataStore 1.2.1.
 
 Die Kotlin-Version ist bewusst an die von AGP gebündelte KGP-Version gepinnt,
 damit sich Compose- und Serialization-Compiler-Plugin nicht mit einem zweiten
 Kotlin-Compiler auf dem Klassenpfad streiten.
+
+## F-Droid-Metadaten
+
+Store-Texte und Changelogs für F-Droid liegen unter
+`fastlane/metadata/android/{de-DE,en-US}/` (Titel, Kurz- und Langbeschreibung,
+Changelog pro Versionscode).
 
 ## Lizenz & Attribution
 

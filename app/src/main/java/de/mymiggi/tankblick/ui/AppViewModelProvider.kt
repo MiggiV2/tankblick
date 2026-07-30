@@ -9,6 +9,7 @@ import de.mymiggi.tankblick.ui.detail.DetailViewModel
 import de.mymiggi.tankblick.ui.favorites.FavoritesViewModel
 import de.mymiggi.tankblick.ui.nearby.NearbyViewModel
 import de.mymiggi.tankblick.ui.onboarding.OnboardingViewModel
+import de.mymiggi.tankblick.ui.settings.SettingsViewModel
 
 /** Single place where ViewModels are handed their dependencies from the AppContainer. */
 object AppViewModelProvider {
@@ -27,6 +28,14 @@ object AppViewModelProvider {
                 apiKeyStore = container.apiKeyStore,
                 settingsStore = container.settingsStore,
                 locationSource = container.locationSource,
+            )
+        }
+        initializer {
+            val container = container()
+            SettingsViewModel(
+                apiKeyStore = container.apiKeyStore,
+                settingsStore = container.settingsStore,
+                loadNavApps = { container.navAppLauncher.installedNavApps() },
             )
         }
         initializer {
