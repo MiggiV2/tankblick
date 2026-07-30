@@ -3,4 +3,19 @@
 
     <!-- Required by the CC BY 4.0 licence of the MTS-K price data. -->
     <string name="attribution_short">Preisdaten: Tankerkönig / MTS-K, CC BY 4.0</string>
+
+    <string name="home_placeholder">API-Key gespeichert. Die Umkreissuche kommt als Nächstes.</string>
+
+    <!-- Onboarding -->
+    <string name="onboarding_title">API-Key einrichten</string>
+    <string name="onboarding_why">Tankblick holt die Spritpreise direkt bei Tankerkönig. Dafür brauchst du einen eigenen, kostenlosen API-Key. Einen Schlüssel in die App einzubauen wäre keine Lösung: Er ließe sich aus jeder APK auslesen und wäre schnell gesperrt.</string>
+    <string name="onboarding_steps">1. Auf onboarding.tankerkoenig.de registrieren — Pflichtangaben sind Vorname, Nachname und E-Mail-Adresse.\n2. Der Key wird von Hand geprüft, das kann einige Tage dauern.\n3. Key hier eintragen.</string>
+    <string name="onboarding_open_registration">Key beantragen</string>
+    <string name="onboarding_key_label">API-Key</string>
+    <string name="onboarding_key_placeholder">00000000-0000-0000-0000-000000000000</string>
+    <string name="onboarding_key_hint">Ein Key sieht aus wie eine UUID.</string>
+    <string name="onboarding_key_invalid">Das sieht nicht nach einem Tankerkönig-Key aus. Erwartet wird eine UUID mit 36 Zeichen.</string>
+    <string name="onboarding_save">Key speichern</string>
+    <string name="onboarding_use_demo_key">Erstmal mit Demo-Key ausprobieren</string>
+    <string name="onboarding_privacy_note">Der Key bleibt auf diesem Gerät: verschlüsselt im Android-Keystore, ausgenommen von Cloud-Backup und Geräteübertragung.</string>
 </resources>
