@@ -52,6 +52,7 @@
     <string name="detail_open_all_day">Durchgehend geöffnet</string>
     <string name="detail_label">Eigener Name</string>
     <string name="detail_label_hint">Zum Beispiel „Zuhause" oder „Arbeit".</string>
+    <string name="navigate_no_app">Keine App gefunden, die Navigation übernehmen kann. Organic Maps und OsmAnd gibt es bei F-Droid.</string>
     <string name="action_navigate">Navigieren</string>
 
     <!-- Settings -->

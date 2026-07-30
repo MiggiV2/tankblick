@@ -34,9 +34,12 @@ object GeoUri {
     /**
      * Percent-encodes everything that could break out of the label.
      *
-     * The parentheses matter most: the label lives inside a pair of them, and
-     * station names like "Esso (Autohof)" are common enough to hit this.
-     * URLEncoder also writes a space as "+", which a geo URI reads literally.
+     * URLEncoder handles the characters that matter, including the parentheses
+     * the label is wrapped in - station names like "Esso (Autohof)" would
+     * otherwise truncate the label or break the URI. Two fixups are still
+     * needed: it writes a space as "+", which a geo URI reads literally rather
+     * than as a space, and the explicit parenthesis replacements guard against
+     * ever swapping in an encoder with a more permissive safe set.
      */
     private fun String.encode(): String =
         URLEncoder.encode(this, Charsets.UTF_8.name())

@@ -1,5 +1,6 @@
 package de.mymiggi.tankblick.ui
 
+import android.widget.Toast
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -35,6 +36,7 @@ import androidx.navigation.toRoute
 import de.mymiggi.tankblick.R
 import de.mymiggi.tankblick.TankblickApplication
 import de.mymiggi.tankblick.navapp.NavAppLauncher
+import de.mymiggi.tankblick.navapp.navigationFeedbackRes
 import de.mymiggi.tankblick.ui.detail.DetailScreen
 import de.mymiggi.tankblick.ui.detail.DetailViewModel
 import de.mymiggi.tankblick.ui.favorites.FavoritesScreen
@@ -234,12 +236,15 @@ private fun StationDetailPane(stationId: String) {
         onLabelChange = viewModel::setLabel,
         onNavigate = {
             uiState.station?.let { station ->
-                NavAppLauncher(context).launch(
+                val started = NavAppLauncher(context).launch(
                     latitude = station.latitude,
                     longitude = station.longitude,
                     name = station.displayName,
                     preferredPackage = settings?.navAppPackage,
                 )
+                navigationFeedbackRes(started)?.let { message ->
+                    Toast.makeText(context, message, Toast.LENGTH_LONG).show()
+                }
             }
         },
         onRetry = viewModel::loadDetails,

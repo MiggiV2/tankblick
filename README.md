@@ -110,7 +110,12 @@ Kotlin-Compiler auf dem Klassenpfad streiten.
 
 Store-Texte und Changelogs für F-Droid liegen unter
 `fastlane/metadata/android/{de-DE,en-US}/` (Titel, Kurz- und Langbeschreibung,
-Changelog pro Versionscode).
+Changelog pro Versionscode). Screenshots fehlen noch — die erwarteten Pfade
+stehen in [RELEASING.md](RELEASING.md).
+
+Der Ablauf für einen Release und die Aufnahme ins F-Droid-Repo ist in
+[RELEASING.md](RELEASING.md) beschrieben, inklusive der Punkte, die für einen
+reproduzierbaren Build zählen.
 
 ## Lizenz & Attribution
 

@@ -37,6 +37,19 @@ android {
         }
     }
 
+    /**
+     * Keeps AGP from embedding its dependency metadata blob in the APK.
+     *
+     * That blob is encrypted with a Google public key, which makes it opaque to
+     * anyone verifying the build and prevents the APK from being reproducible.
+     * F-Droid rebuilds every app from source and compares the result, so this
+     * has to be off.
+     */
+    dependenciesInfo {
+        includeInApk = false
+        includeInBundle = false
+    }
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
@@ -46,6 +59,41 @@ android {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
+    }
+
+    /**
+     * Signing is opt-in through an untracked keystore.properties.
+     *
+     * F-Droid signs with its own key after rebuilding from source, so this is
+     * only for producing a locally signed APK. Without the file the release
+     * build stays unsigned rather than failing, which is what CI and a fresh
+     * clone need.
+     */
+    val keystoreProperties = rootProject.file("keystore.properties")
+    if (keystoreProperties.exists()) {
+        val properties = java.util.Properties().apply {
+            keystoreProperties.inputStream().use { load(it) }
+        }
+
+        // Checked up front: a typo would otherwise surface as a bare
+        // InvalidUserDataException on every Gradle invocation, not just on
+        // assembleRelease, and with nothing pointing at the actual cause.
+        val required = listOf("storeFile", "storePassword", "keyAlias", "keyPassword")
+        val missing = required.filter { properties.getProperty(it).isNullOrBlank() }
+        require(missing.isEmpty()) {
+            "keystore.properties is missing: ${missing.joinToString()}. " +
+                "See RELEASING.md, or delete the file to build unsigned."
+        }
+
+        signingConfigs {
+            create("release") {
+                storeFile = rootProject.file(properties.getProperty("storeFile"))
+                storePassword = properties.getProperty("storePassword")
+                keyAlias = properties.getProperty("keyAlias")
+                keyPassword = properties.getProperty("keyPassword")
+            }
+        }
+        buildTypes.getByName("release").signingConfig = signingConfigs.getByName("release")
     }
 }
 
