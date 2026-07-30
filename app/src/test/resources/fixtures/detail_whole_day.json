@@ -1,0 +1,25 @@
+{
+    "ok": true,
+    "license": "CC BY 4.0 -  https://creativecommons.tankerkoenig.de",
+    "data": "MTS-K",
+    "status": "ok",
+    "station": {
+        "id": "94e70fc4-b22f-4e5a-877f-bc1082cdae81",
+        "name": "Autohof Nonstop",
+        "brand": "",
+        "street": "Bundesstraße",
+        "houseNumber": "",
+        "postCode": 10405,
+        "place": "Berlin",
+        "openingTimes": [],
+        "overrides": ["24.12.2026, 06:00-14:00"],
+        "wholeDay": true,
+        "isOpen": true,
+        "e5": null,
+        "e10": 1.789,
+        "diesel": false,
+        "lat": 52.528899,
+        "lng": 13.41808,
+        "state": null
+    }
+}

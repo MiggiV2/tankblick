@@ -24,6 +24,8 @@ android {
 
     buildFeatures {
         compose = true
+        // Only for VERSION_NAME, which goes into the User-Agent header.
+        buildConfig = true
     }
 
     buildTypes {
