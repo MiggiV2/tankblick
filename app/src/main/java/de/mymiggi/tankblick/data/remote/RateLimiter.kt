@@ -14,13 +14,16 @@ import kotlin.math.ceil
  * one-off reactions to a tap rather than polling.
  *
  * [clock] is injectable so the behaviour can be tested without waiting.
+ *
+ * [store] holds the timestamp of the last granted request. Every attempt reads
+ * it back rather than caching it in a field, so the limit survives process
+ * death when the store does.
  */
 class RateLimiter(
     private val minIntervalMillis: Long,
     private val clock: () -> Long = System::currentTimeMillis,
+    private val store: RateLimiterStore = RateLimiterStore.inMemory(),
 ) {
-
-    private var lastRequestAtMillis: Long? = null
 
     /**
      * Claims a request slot.
@@ -31,7 +34,7 @@ class RateLimiter(
     @Synchronized
     fun tryAcquire(): Long? {
         val now = clock()
-        val last = lastRequestAtMillis
+        val last = store.lastRequestAtMillis()
         val elapsed = if (last == null) Long.MAX_VALUE else now - last
 
         // A negative elapsed time means the wall clock jumped backwards, for
@@ -41,7 +44,7 @@ class RateLimiter(
             return ceil((minIntervalMillis - elapsed) / 1000.0).toLong()
         }
 
-        lastRequestAtMillis = now
+        store.recordRequestAt(now)
         return null
     }
 

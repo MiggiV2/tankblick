@@ -88,4 +88,55 @@ class RateLimiterTest {
 
         assertNull(limiter.tryAcquire())
     }
+
+    /**
+     * The interval has to outlive the process, or force-stopping the app would
+     * hand out a free request - and the countdown the user was shown before
+     * would turn out to have been a lie.
+     */
+    @Test
+    fun `keeps the remaining interval across a restart`() {
+        val store = RateLimiterStore.inMemory()
+        RateLimiter(minIntervalMillis = 60_000L, clock = { now }, store = store).tryAcquire()
+
+        now += 30_000L
+        val restarted = RateLimiter(minIntervalMillis = 60_000L, clock = { now }, store = store)
+
+        assertEquals(30L, restarted.tryAcquire())
+    }
+
+    @Test
+    fun `allows the first request after a restart once the interval has passed`() {
+        val store = RateLimiterStore.inMemory()
+        RateLimiter(minIntervalMillis = 60_000L, clock = { now }, store = store).tryAcquire()
+
+        now += 60_000L
+        val restarted = RateLimiter(minIntervalMillis = 60_000L, clock = { now }, store = store)
+
+        assertNull(restarted.tryAcquire())
+    }
+
+    /** A rejected attempt writes nothing, so a restart cannot inherit a longer wait. */
+    @Test
+    fun `does not record a rejected attempt`() {
+        val store = RateLimiterStore.inMemory()
+        val limiter = RateLimiter(minIntervalMillis = 60_000L, clock = { now }, store = store)
+        limiter.tryAcquire()
+
+        now += 30_000L
+        limiter.tryAcquire()
+
+        assertEquals(1_000_000L, store.lastRequestAtMillis())
+    }
+
+    /** Two limiters must not share a slot just because they share a process. */
+    @Test
+    fun `limiters with separate stores do not block each other`() {
+        val refresh = RateLimiter(60_000L, clock = { now }, store = RateLimiterStore.inMemory())
+        val detail = RateLimiter(2_000L, clock = { now }, store = RateLimiterStore.inMemory())
+
+        refresh.tryAcquire()
+
+        assertNull(detail.tryAcquire())
+    }
 }

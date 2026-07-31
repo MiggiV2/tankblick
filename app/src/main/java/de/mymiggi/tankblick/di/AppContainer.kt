@@ -4,6 +4,7 @@ import android.content.Context
 import de.mymiggi.tankblick.BuildConfig
 import de.mymiggi.tankblick.data.prefs.AndroidKeystoreCipher
 import de.mymiggi.tankblick.data.prefs.ApiKeyStore
+import de.mymiggi.tankblick.data.prefs.PrefsRateLimiterStore
 import de.mymiggi.tankblick.data.prefs.SettingsStore
 import de.mymiggi.tankblick.data.prefs.secretsDataStore
 import de.mymiggi.tankblick.data.prefs.settingsDataStore
@@ -11,6 +12,7 @@ import de.mymiggi.tankblick.data.local.TankblickDatabase
 import de.mymiggi.tankblick.data.repo.StartupTasks
 import de.mymiggi.tankblick.data.repo.DefaultStationRepository
 import de.mymiggi.tankblick.data.repo.StationRepository
+import de.mymiggi.tankblick.domain.ApiKey
 import de.mymiggi.tankblick.location.LocationManagerSource
 import de.mymiggi.tankblick.location.LocationSource
 import de.mymiggi.tankblick.navapp.NavAppLauncher
@@ -42,7 +44,13 @@ class AppContainer(context: Context) {
     val applicationScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 
     val apiKeyStore: ApiKeyStore by lazy {
-        ApiKeyStore(appContext.secretsDataStore, AndroidKeystoreCipher())
+        ApiKeyStore(
+            dataStore = appContext.secretsDataStore,
+            cipher = AndroidKeystoreCipher(),
+            // Empty unless the build was given a key, in which case parse()
+            // returns null and the app asks for one as before.
+            buildKey = ApiKey.parse(BuildConfig.API_KEY),
+        )
     }
 
     val settingsStore: SettingsStore by lazy {
@@ -79,11 +87,23 @@ class AppContainer(context: Context) {
         }
     }
 
+    /**
+     * Touches disk on first use, so it is created lazily: the limiters are only
+     * consulted from a request, which never happens on the main thread.
+     */
+    private val rateLimitPreferences by lazy { PrefsRateLimiterStore.preferencesOf(appContext) }
+
     private val tankerkoenigApi: TankerkoenigApi by lazy {
         TankerkoenigApi(
             httpClient = httpClient,
-            refreshLimiter = RateLimiter(RateLimiter.REFRESH_INTERVAL_MILLIS),
-            detailLimiter = RateLimiter(RateLimiter.DETAIL_INTERVAL_MILLIS),
+            refreshLimiter = RateLimiter(
+                minIntervalMillis = RateLimiter.REFRESH_INTERVAL_MILLIS,
+                store = PrefsRateLimiterStore(rateLimitPreferences, "refresh"),
+            ),
+            detailLimiter = RateLimiter(
+                minIntervalMillis = RateLimiter.DETAIL_INTERVAL_MILLIS,
+                store = PrefsRateLimiterStore(rateLimitPreferences, "detail"),
+            ),
         )
     }
 

@@ -38,8 +38,10 @@ class SettingsViewModelTest {
     val tempFolder = TemporaryFolder()
 
     private val keyText = "d4f1a2b3-1111-4222-8333-abcdefabcdef"
+    private val buildKeyText = "11111111-2222-3333-4444-555555555555"
 
     private lateinit var storeScope: TestScope
+    private lateinit var secrets: DataStore<Preferences>
     private lateinit var apiKeyStore: ApiKeyStore
     private lateinit var settingsStore: SettingsStore
     private var installedApps = listOf(
@@ -50,7 +52,7 @@ class SettingsViewModelTest {
     @Before
     fun setUp() {
         storeScope = TestScope(UnconfinedTestDispatcher())
-        val secrets: DataStore<Preferences> = PreferenceDataStoreFactory.create(scope = storeScope) {
+        secrets = PreferenceDataStoreFactory.create(scope = storeScope) {
             tempFolder.newFile("secrets.preferences_pb")
         }
         val settings: DataStore<Preferences> =
@@ -94,6 +96,35 @@ class SettingsViewModelTest {
     @Test
     fun `a personal key is not flagged as the demo key`() = runTest {
         assertFalse(viewModel().uiState.value.isDemoKey)
+    }
+
+    /**
+     * A key that came from the build cannot be forgotten - it is compiled in.
+     * The screen needs to know so it does not offer a button that does nothing.
+     */
+    @Test
+    fun `flags a key that came from the build`() = runTest {
+        apiKeyStore = ApiKeyStore(secrets, FakeSecretCipher(), ApiKey.parse(buildKeyText)!!)
+
+        val state = viewModel(withKey = false).uiState.value
+
+        assertTrue(state.isBuildKey)
+        assertEquals("11111111-…-555555555555", state.maskedApiKey)
+    }
+
+    @Test
+    fun `does not flag the build key once the user has entered their own`() = runTest {
+        apiKeyStore = ApiKeyStore(secrets, FakeSecretCipher(), ApiKey.parse(buildKeyText)!!)
+
+        val state = viewModel().uiState.value
+
+        assertFalse(state.isBuildKey)
+        assertEquals("d4f1a2b3-…-abcdefabcdef", state.maskedApiKey)
+    }
+
+    @Test
+    fun `does not flag a build key when the build had none`() = runTest {
+        assertFalse(viewModel().uiState.value.isBuildKey)
     }
 
     @Test

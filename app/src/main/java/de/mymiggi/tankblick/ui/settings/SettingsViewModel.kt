@@ -21,6 +21,8 @@ data class SettingsUiState(
     /** Masked, so the key cannot be read off a shoulder or a screenshot. */
     val maskedApiKey: String? = null,
     val isDemoKey: Boolean = false,
+    /** The key was compiled into this build, so it cannot be forgotten - only replaced. */
+    val isBuildKey: Boolean = false,
     val navApps: List<NavApp> = emptyList(),
 )
 
@@ -36,12 +38,14 @@ class SettingsViewModel(
     val uiState: StateFlow<SettingsUiState> = combine(
         settingsStore.settings,
         apiKeyStore.apiKey,
+        apiKeyStore.userApiKey,
         navApps,
-    ) { settings, apiKey, apps ->
+    ) { settings, apiKey, userApiKey, apps ->
         SettingsUiState(
             settings = settings,
             maskedApiKey = apiKey?.masked(),
             isDemoKey = apiKey?.isDemo == true,
+            isBuildKey = apiKey != null && userApiKey == null,
             navApps = apps,
         )
     }.stateIn(

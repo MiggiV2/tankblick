@@ -81,6 +81,7 @@
     <string name="settings_api_key_demo">This is the demo key. It returns sample data, not real prices.</string>
     <string name="settings_api_key_replace">Replace key</string>
     <string name="settings_api_key_forget">Delete key</string>
+    <string name="settings_api_key_build">Shipped with this version of the app. You can enter your own key, which then takes precedence.</string>
     <string name="settings_about">About Tankblick</string>
     <string name="settings_privacy_title">Privacy</string>
     <string name="settings_privacy_body">Tankblick talks to exactly one server: creativecommons.tankerkoenig.de. No account, no tracking, no analytics, no ads.\n\nYour location leaves the device only as a coordinate pair in a search you started yourself — never in the background. The API key is encrypted in the Android Keystore and excluded from backups. Favourites, settings and prices stay local; price history is deleted after 30 days.</string>

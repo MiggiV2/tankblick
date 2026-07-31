@@ -8,6 +8,43 @@ plugins {
     alias(libs.plugins.ksp)
 }
 
+/**
+ * An optional Tankerkoenig key compiled into the app.
+ *
+ * With it, a build starts ready to use instead of sending the user through
+ * onboarding; without it, BuildConfig.API_KEY is empty and nothing changes. A
+ * key entered in the app always wins over this one.
+ *
+ * Set it out of tree, never in the committed gradle.properties:
+ *
+ *     ~/.gradle/gradle.properties:  tankblick.apiKey=<uuid>
+ *     environment:                  TANKBLICK_API_KEY=<uuid>
+ *     one build:                    ./gradlew assembleRelease -Ptankblick.apiKey=<uuid>
+ *
+ * A key in an APK is readable by anyone who has the APK - `strings` is enough.
+ * Only bake in a key for builds that stay on your own devices, or one that is
+ * meant to be public and whose rate limit you are willing to share.
+ *
+ * Read through providers so the configuration cache invalidates when the value
+ * changes, and validated here so a typo fails the build instead of every
+ * request at runtime. The key itself is kept out of the message: build logs get
+ * pasted into issues.
+ */
+val buildApiKey: String = providers.gradleProperty("tankblick.apiKey")
+    .orElse(providers.environmentVariable("TANKBLICK_API_KEY"))
+    .getOrElse("")
+    .trim()
+    .lowercase()
+
+require(
+    buildApiKey.isEmpty() ||
+        Regex("^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$")
+            .matches(buildApiKey),
+) {
+    "tankblick.apiKey is not a Tankerkoenig API key. Expected a UUID like " +
+        "00000000-0000-0000-0000-000000000002, got ${buildApiKey.length} characters."
+}
+
 android {
     namespace = "de.mymiggi.tankblick"
     // androidx.core 1.19 and lifecycle 2.11 require compiling against API 37.
@@ -23,11 +60,13 @@ android {
         versionName = "0.2.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        buildConfigField("String", "API_KEY", "\"$buildApiKey\"")
     }
 
     buildFeatures {
         compose = true
-        // Only for VERSION_NAME, which goes into the User-Agent header.
+        // For VERSION_NAME, which goes into the User-Agent header, and API_KEY.
         buildConfig = true
     }
 

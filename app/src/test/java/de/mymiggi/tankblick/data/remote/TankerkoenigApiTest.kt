@@ -41,8 +41,8 @@ class TankerkoenigApiTest {
         }
         return TankerkoenigApi(
             httpClient = client,
-            refreshLimiter = RateLimiter(refreshIntervalMillis) { now },
-            detailLimiter = RateLimiter(0L) { now },
+            refreshLimiter = RateLimiter(refreshIntervalMillis, clock = { now }),
+            detailLimiter = RateLimiter(0L, clock = { now }),
         )
     }
 

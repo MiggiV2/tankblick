@@ -81,6 +81,7 @@
     <string name="settings_api_key_demo">Das ist der Demo-Key. Er liefert Beispieldaten, keine echten Preise.</string>
     <string name="settings_api_key_replace">Key ersetzen</string>
     <string name="settings_api_key_forget">Key löschen</string>
+    <string name="settings_api_key_build">Mit dieser App-Version ausgeliefert. Du kannst einen eigenen Key eintragen, der dann verwendet wird.</string>
     <string name="settings_about">Über Tankblick</string>
     <string name="settings_privacy_title">Datenschutz</string>
     <string name="settings_privacy_body">Tankblick spricht mit genau einem Server: creativecommons.tankerkoenig.de. Kein Konto, kein Tracking, keine Analytics, keine Werbung.

@@ -95,6 +95,7 @@ fun SettingsScreen(
         ApiKeySection(
             maskedApiKey = uiState.maskedApiKey,
             isDemoKey = uiState.isDemoKey,
+            isBuildKey = uiState.isBuildKey,
             onReplaceApiKey = onReplaceApiKey,
             onForgetApiKey = onForgetApiKey,
         )
@@ -310,6 +311,7 @@ private fun NavAppOption(label: String, selected: Boolean, onSelect: () -> Unit)
 private fun ApiKeySection(
     maskedApiKey: String?,
     isDemoKey: Boolean,
+    isBuildKey: Boolean,
     onReplaceApiKey: suspend (String) -> Boolean,
     onForgetApiKey: () -> Unit,
 ) {
@@ -330,12 +332,23 @@ private fun ApiKeySection(
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
             )
         }
+        if (isBuildKey) {
+            Text(
+                text = stringResource(R.string.settings_api_key_build),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
+            )
+        }
         Row(modifier = Modifier.padding(horizontal = 8.dp)) {
             TextButton(onClick = { showDialog = true }) {
                 Text(stringResource(R.string.settings_api_key_replace))
             }
-            TextButton(onClick = onForgetApiKey) {
-                Text(stringResource(R.string.settings_api_key_forget))
+            // A key from the build cannot be deleted, so the button would lie.
+            if (!isBuildKey) {
+                TextButton(onClick = onForgetApiKey) {
+                    Text(stringResource(R.string.settings_api_key_forget))
+                }
             }
         }
     }

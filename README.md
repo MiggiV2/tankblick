@@ -34,13 +34,15 @@ E5, E10 und Diesel aus der [Tankerkönig-API](https://creativecommons.tankerkoen
   Einstellungen gewählte App oder der System-Dialog.
 - **Einstellungen:** Darstellung (hell, dunkel oder wie das System) und vier
   Farbschemata neben dem dynamischen Material-Theme, Suchradius (1–25 km),
-  Wahl der Navigations-App, API-Key (maskiert, austauschbar, löschbar),
+  Wahl der Navigations-App, API-Key (maskiert, austauschbar, löschbar — ein
+  einkompilierter Key nur austauschbar),
   Info-/Datenschutz-Abschnitt.
 - **Offline-first:** Room-Cache, jeder Bildschirm zeigt das Alter seiner
   Daten, ein fehlgeschlagener Refresh leert den Cache nie, Preisverlauf wird
   beim Start nach 30 Tagen bereinigt.
 - **Selbst auferlegtes Rate-Limiting:** 60 s zwischen Refreshes, 2 s Debounce
-  für Detailabfragen, Radius auf 25 km gedeckelt.
+  für Detailabfragen, Radius auf 25 km gedeckelt. Die Wartezeit wird persistiert
+  und übersteht einen App-Neustart.
 - Deutsch ist die Standard-Locale (`values/`), Englisch liegt in
   `values-en/`.
 
@@ -51,6 +53,7 @@ E5, E10 und Diesel aus der [Tankerkönig-API](https://creativecommons.tankerkoen
 | Dein Standort | Verlässt das Gerät nur als Koordinatenpaar im Request an Tankerkönig, und nur wenn du eine Umkreissuche startest. |
 | Dein API-Key | Bleibt auf dem Gerät. AES-256-GCM-verschlüsselt mit einem nicht exportierbaren Schlüssel aus dem Android Keystore. Vom Cloud-Backup und der Geräteübertragung ausgenommen. |
 | Favoriten, Einstellungen, Preis-Cache | Ausschließlich lokal (Room/DataStore). |
+| Zeitstempel der letzten Anfrage | Ausschließlich lokal (SharedPreferences `rate_limits`), damit das Rate-Limit einen Neustart übersteht. |
 | Analytics, Crash-Reporting, Werbung | Gibt es nicht. |
 
 Die App fordert drei Berechtigungen an: `INTERNET`, `ACCESS_COARSE_LOCATION`
@@ -76,6 +79,25 @@ und jeder Nutzer den eigenen Key mit**:
 3. Key in Tankblick unter *Einstellungen → API-Key* eintragen.
 
 Zum reinen Ausprobieren gibt es einen Demo-Key, der Dummy-Daten liefert.
+
+### Key beim Bauen einbacken
+
+Wer selbst baut, kann den eigenen Key mitkompilieren und das Onboarding
+überspringen:
+
+```sh
+./gradlew assembleRelease -Ptankblick.apiKey=<uuid>
+# oder dauerhaft: tankblick.apiKey=<uuid> in ~/.gradle/gradle.properties
+# oder per Umgebungsvariable: TANKBLICK_API_KEY=<uuid>
+```
+
+Ohne die Option bleibt `BuildConfig.API_KEY` leer und die App fragt wie gehabt
+nach einem Key. Ein in den Einstellungen eingetragener Key hat immer Vorrang.
+
+**Nicht in die committete `gradle.properties` schreiben** und ein so gebautes APK
+nicht weitergeben: der Key steht im Klartext in der APK und ist mit `strings` in
+Sekunden ausgelesen. Die Verschlüsselung im Android Keystore gilt nur für Keys,
+die in der App eingetragen wurden.
 
 **Die Tankerkönig-Nutzungsbedingungen sind bindend:** maximal ein Request pro
 Minute, maximal 25 km Radius, maximal 10 Stationen pro Preisabfrage. Tankblick

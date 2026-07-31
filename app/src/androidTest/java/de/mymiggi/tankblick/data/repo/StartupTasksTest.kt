@@ -40,7 +40,7 @@ class StartupTasksTest {
         startupTasks = StartupTasks(
             DefaultStationRepository(
                 dao = dao,
-                api = TankerkoenigApi(client, RateLimiter(0L) { now }, RateLimiter(0L) { now }),
+                api = TankerkoenigApi(client, RateLimiter(0L, clock = { now }), RateLimiter(0L, clock = { now })),
                 now = { now },
             ),
         )

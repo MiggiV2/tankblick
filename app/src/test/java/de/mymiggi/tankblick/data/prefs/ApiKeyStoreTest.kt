@@ -28,6 +28,7 @@ class ApiKeyStoreTest {
     val tempFolder = TemporaryFolder()
 
     private val validKey = ApiKey.parse("d4f1a2b3-1111-4222-8333-abcdefabcdef")!!
+    private val buildKey = ApiKey.parse("11111111-2222-3333-4444-555555555555")!!
 
     private lateinit var scope: TestScope
     private lateinit var dataStore: DataStore<Preferences>
@@ -120,5 +121,55 @@ class ApiKeyStoreTest {
 
         assertNull(store.apiKey.first())
         assertNull(dataStore.data.first()[stringPreferencesKey("api_key")])
+    }
+
+    @Test
+    fun `falls back to the key baked into the build`() = runTest {
+        val store = ApiKeyStore(dataStore, cipher, buildKey)
+
+        assertEquals(buildKey, store.apiKey.first())
+    }
+
+    /** A key the user entered is theirs; it must win over whatever was shipped. */
+    @Test
+    fun `prefers the stored key over the one baked into the build`() = runTest {
+        val store = ApiKeyStore(dataStore, cipher, buildKey)
+        store.save(validKey)
+
+        assertEquals(validKey, store.apiKey.first())
+    }
+
+    @Test
+    fun `falls back to the build key again after the stored key is cleared`() = runTest {
+        val store = ApiKeyStore(dataStore, cipher, buildKey)
+        store.save(validKey)
+
+        store.clear()
+
+        assertEquals(buildKey, store.apiKey.first())
+    }
+
+    /** An unreadable blob must not strand a build that ships a usable key. */
+    @Test
+    fun `falls back to the build key when the stored key cannot be decrypted`() = runTest {
+        val store = ApiKeyStore(dataStore, cipher, buildKey)
+        store.save(validKey)
+        cipher.failDecryption = true
+
+        assertEquals(buildKey, store.apiKey.first())
+    }
+
+    /**
+     * The settings screen has to tell the two apart: a build key cannot be
+     * forgotten, and offering to would be a button that does nothing.
+     */
+    @Test
+    fun `reports only the stored key as the user's own`() = runTest {
+        val store = ApiKeyStore(dataStore, cipher, buildKey)
+
+        assertNull(store.userApiKey.first())
+
+        store.save(validKey)
+        assertEquals(validKey, store.userApiKey.first())
     }
 }
