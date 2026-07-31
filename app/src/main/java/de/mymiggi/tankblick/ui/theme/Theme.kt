@@ -3,86 +3,63 @@ package de.mymiggi.tankblick.ui.theme
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
-import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
-
-private val LightColors = lightColorScheme(
-    primary = PrimaryLight,
-    onPrimary = OnPrimaryLight,
-    primaryContainer = PrimaryContainerLight,
-    onPrimaryContainer = OnPrimaryContainerLight,
-    secondary = SecondaryLight,
-    onSecondary = OnSecondaryLight,
-    secondaryContainer = SecondaryContainerLight,
-    onSecondaryContainer = OnSecondaryContainerLight,
-    tertiary = TertiaryLight,
-    onTertiary = OnTertiaryLight,
-    tertiaryContainer = TertiaryContainerLight,
-    onTertiaryContainer = OnTertiaryContainerLight,
-    error = ErrorLight,
-    onError = OnErrorLight,
-    errorContainer = ErrorContainerLight,
-    onErrorContainer = OnErrorContainerLight,
-    background = BackgroundLight,
-    onBackground = OnBackgroundLight,
-    surface = SurfaceLight,
-    onSurface = OnSurfaceLight,
-    surfaceVariant = SurfaceVariantLight,
-    onSurfaceVariant = OnSurfaceVariantLight,
-    outline = OutlineLight,
-    outlineVariant = OutlineVariantLight,
-)
-
-private val DarkColors = darkColorScheme(
-    primary = PrimaryDark,
-    onPrimary = OnPrimaryDark,
-    primaryContainer = PrimaryContainerDark,
-    onPrimaryContainer = OnPrimaryContainerDark,
-    secondary = SecondaryDark,
-    onSecondary = OnSecondaryDark,
-    secondaryContainer = SecondaryContainerDark,
-    onSecondaryContainer = OnSecondaryContainerDark,
-    tertiary = TertiaryDark,
-    onTertiary = OnTertiaryDark,
-    tertiaryContainer = TertiaryContainerDark,
-    onTertiaryContainer = OnTertiaryContainerDark,
-    error = ErrorDark,
-    onError = OnErrorDark,
-    errorContainer = ErrorContainerDark,
-    onErrorContainer = OnErrorContainerDark,
-    background = BackgroundDark,
-    onBackground = OnBackgroundDark,
-    surface = SurfaceDark,
-    onSurface = OnSurfaceDark,
-    surfaceVariant = SurfaceVariantDark,
-    onSurfaceVariant = OnSurfaceVariantDark,
-    outline = OutlineDark,
-    outlineVariant = OutlineVariantDark,
-)
+import de.mymiggi.tankblick.domain.ColorSchemePreference
+import de.mymiggi.tankblick.domain.DarkModePreference
 
 @Composable
 fun TankblickTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
-    dynamicColor: Boolean = true,
+    darkMode: DarkModePreference = DarkModePreference.SYSTEM,
+    colorScheme: ColorSchemePreference = ColorSchemePreference.DYNAMIC,
     content: @Composable () -> Unit,
 ) {
-    val colorScheme = when {
-        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-            val context = LocalContext.current
-            if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
-        }
+    val darkTheme = when (darkMode) {
+        DarkModePreference.SYSTEM -> isSystemInDarkTheme()
+        DarkModePreference.LIGHT -> false
+        DarkModePreference.DARK -> true
+    }
 
-        darkTheme -> DarkColors
-        else -> LightColors
+    // Dynamic colour only exists from Android 12. On anything older the choice
+    // silently becomes Petrol rather than failing or showing an empty theme.
+    val dynamicAvailable = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
+    val useDynamic = colorScheme == ColorSchemePreference.DYNAMIC && dynamicAvailable
+
+    val colors = when {
+        useDynamic && darkTheme -> dynamicDarkColorScheme(LocalContext.current)
+        useDynamic -> dynamicLightColorScheme(LocalContext.current)
+        darkTheme -> colorScheme.darkScheme()
+        else -> colorScheme.lightScheme()
     }
 
     MaterialTheme(
-        colorScheme = colorScheme,
+        colorScheme = colors,
         typography = TankblickTypography,
+        content = content,
+    )
+}
+
+/**
+ * For previews and tests, which want a fixed look rather than whatever the
+ * device or the stored settings say. A separate name rather than an overload:
+ * two overloads with all-default parameters would make a bare
+ * `TankblickTheme { }` ambiguous.
+ */
+@Composable
+fun TankblickPreviewTheme(
+    darkTheme: Boolean = isSystemInDarkTheme(),
+    dynamicColor: Boolean = false,
+    content: @Composable () -> Unit,
+) {
+    TankblickTheme(
+        darkMode = if (darkTheme) DarkModePreference.DARK else DarkModePreference.LIGHT,
+        colorScheme = if (dynamicColor) {
+            ColorSchemePreference.DYNAMIC
+        } else {
+            ColorSchemePreference.PETROL
+        },
         content = content,
     )
 }

@@ -51,12 +51,22 @@
     <string name="detail_opening_hours_unknown">Keine Öffnungszeiten hinterlegt.</string>
     <string name="detail_open_all_day">Durchgehend geöffnet</string>
     <string name="detail_label">Eigener Name</string>
-    <string name="detail_label_hint">Zum Beispiel „Zuhause" oder „Arbeit".</string>
+    <string name="detail_label_hint">Zum Beispiel „Zuhause“ oder „Arbeit“.</string>
     <string name="navigate_no_app">Keine App gefunden, die Navigation übernehmen kann. Organic Maps und OsmAnd gibt es bei F-Droid.</string>
     <string name="action_navigate">Navigieren</string>
 
     <!-- Settings -->
     <string name="tab_settings">Einstellungen</string>
+    <string name="settings_appearance">Darstellung</string>
+    <string name="settings_dark_system">System</string>
+    <string name="settings_dark_light">Hell</string>
+    <string name="settings_dark_dark">Dunkel</string>
+    <string name="settings_color_scheme">Farbschema</string>
+    <string name="settings_scheme_dynamic">Dynamisch (Hintergrundbild)</string>
+    <string name="settings_scheme_petrol">Petrol</string>
+    <string name="settings_scheme_forest">Wald</string>
+    <string name="settings_scheme_amber">Bernstein</string>
+    <string name="settings_scheme_plum">Pflaume</string>
     <string name="settings_radius">Suchradius</string>
     <plurals name="settings_radius_value">
         <item quantity="one">%1$d Kilometer</item>

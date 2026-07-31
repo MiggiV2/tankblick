@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -40,7 +41,7 @@ import de.mymiggi.tankblick.ui.common.DataFooter
 import de.mymiggi.tankblick.ui.common.MessageBanner
 import de.mymiggi.tankblick.ui.common.PriceText
 import de.mymiggi.tankblick.ui.nearby.labelRes
-import de.mymiggi.tankblick.ui.theme.TankblickTheme
+import de.mymiggi.tankblick.ui.theme.TankblickPreviewTheme
 
 @Composable
 fun DetailScreen(
@@ -57,6 +58,10 @@ fun DetailScreen(
     Column(
         modifier = modifier
             .fillMaxSize()
+            // With edge-to-edge, adjustResize no longer shrinks the content on
+            // its own. Without this the label field sat behind the keyboard and
+            // you could not see what you were typing.
+            .imePadding()
             .verticalScroll(rememberScrollState()),
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
@@ -250,7 +255,7 @@ private fun LabelField(current: String?, onLabelChange: (String) -> Unit) {
 @Preview(showBackground = true)
 @Composable
 private fun DetailScreenPreview() {
-    TankblickTheme(dynamicColor = false) {
+    TankblickPreviewTheme() {
         DetailScreen(
             uiState = DetailUiState(
                 station = Station(

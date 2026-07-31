@@ -24,7 +24,7 @@ import de.mymiggi.tankblick.domain.Station
 import de.mymiggi.tankblick.ui.common.DataFooter
 import de.mymiggi.tankblick.ui.common.MessageBanner
 import de.mymiggi.tankblick.ui.common.StationRow
-import de.mymiggi.tankblick.ui.theme.TankblickTheme
+import de.mymiggi.tankblick.ui.theme.TankblickPreviewTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -95,7 +95,7 @@ private fun EmptyState() {
 @Preview(showBackground = true)
 @Composable
 private fun FavoritesScreenPreview() {
-    TankblickTheme(dynamicColor = false) {
+    TankblickPreviewTheme() {
         FavoritesScreen(
             uiState = FavoritesUiState(
                 stations = listOf(

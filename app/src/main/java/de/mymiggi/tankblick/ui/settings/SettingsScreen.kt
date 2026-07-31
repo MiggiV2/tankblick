@@ -1,6 +1,14 @@
 package de.mymiggi.tankblick.ui.settings
 
 import android.content.Intent
+import android.os.Build
+import androidx.compose.foundation.background
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.FilterChip
+import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -38,8 +46,12 @@ import androidx.core.net.toUri
 import de.mymiggi.tankblick.BuildConfig
 import de.mymiggi.tankblick.R
 import de.mymiggi.tankblick.data.prefs.Settings
+import de.mymiggi.tankblick.domain.ColorSchemePreference
+import de.mymiggi.tankblick.domain.DarkModePreference
 import de.mymiggi.tankblick.navapp.NavApp
-import de.mymiggi.tankblick.ui.theme.TankblickTheme
+import de.mymiggi.tankblick.ui.theme.TankblickPreviewTheme
+import de.mymiggi.tankblick.ui.theme.darkScheme
+import de.mymiggi.tankblick.ui.theme.lightScheme
 import kotlinx.coroutines.launch
 
 private const val TANKERKOENIG_URL = "https://creativecommons.tankerkoenig.de/"
@@ -48,6 +60,8 @@ private const val LICENCE_URL = "https://creativecommons.org/licenses/by/4.0/dee
 @Composable
 fun SettingsScreen(
     uiState: SettingsUiState,
+    onDarkModeChange: (DarkModePreference) -> Unit,
+    onColorSchemeChange: (ColorSchemePreference) -> Unit,
     onRadiusChange: (Int) -> Unit,
     onNavAppChange: (String?) -> Unit,
     onReplaceApiKey: suspend (String) -> Boolean,
@@ -63,6 +77,13 @@ fun SettingsScreen(
             .padding(vertical = 8.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
+        AppearanceSection(
+            darkMode = uiState.settings.darkMode,
+            colorScheme = uiState.settings.colorScheme,
+            onDarkModeChange = onDarkModeChange,
+            onColorSchemeChange = onColorSchemeChange,
+        )
+        HorizontalDivider()
         RadiusSection(radiusKm = uiState.settings.radiusKm, onRadiusChange = onRadiusChange)
         HorizontalDivider()
         NavAppSection(
@@ -98,6 +119,114 @@ private fun SectionTitle(text: String) {
         modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
     )
 }
+
+@Composable
+private fun AppearanceSection(
+    darkMode: DarkModePreference,
+    colorScheme: ColorSchemePreference,
+    onDarkModeChange: (DarkModePreference) -> Unit,
+    onColorSchemeChange: (ColorSchemePreference) -> Unit,
+) {
+    Column {
+        SectionTitle(stringResource(R.string.settings_appearance))
+
+        Row(
+            modifier = Modifier
+                .padding(horizontal = 16.dp)
+                .selectableGroup(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            DarkModePreference.entries.forEach { mode ->
+                FilterChip(
+                    selected = mode == darkMode,
+                    onClick = { onDarkModeChange(mode) },
+                    label = { Text(stringResource(mode.labelRes)) },
+                )
+            }
+        }
+
+        Text(
+            text = stringResource(R.string.settings_color_scheme),
+            style = MaterialTheme.typography.bodyMedium,
+            modifier = Modifier.padding(start = 16.dp, top = 16.dp, end = 16.dp),
+        )
+
+        // Dynamic colour needs Android 12. Offering it on older devices would
+        // be a switch that visibly does nothing.
+        val schemes = ColorSchemePreference.entries.filter {
+            it != ColorSchemePreference.DYNAMIC ||
+                Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
+        }
+
+        Column(modifier = Modifier.selectableGroup()) {
+            schemes.forEach { scheme ->
+                SchemeOption(
+                    scheme = scheme,
+                    selected = scheme == colorScheme,
+                    onSelect = { onColorSchemeChange(scheme) },
+                )
+            }
+        }
+    }
+}
+
+/** Each option shows the colours it would apply, so the name is not the only clue. */
+@Composable
+private fun SchemeOption(
+    scheme: ColorSchemePreference,
+    selected: Boolean,
+    onSelect: () -> Unit,
+) {
+    val isDark = isSystemInDarkTheme()
+    val preview = if (scheme == ColorSchemePreference.DYNAMIC) {
+        MaterialTheme.colorScheme
+    } else {
+        if (isDark) scheme.darkScheme() else scheme.lightScheme()
+    }
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .selectable(selected = selected, role = Role.RadioButton, onClick = onSelect)
+            .padding(horizontal = 16.dp, vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        RadioButton(selected = selected, onClick = null)
+        Text(
+            text = stringResource(scheme.labelRes),
+            style = MaterialTheme.typography.bodyLarge,
+            modifier = Modifier
+                .padding(start = 16.dp)
+                .weight(1f),
+        )
+        Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+            listOf(preview.primary, preview.secondary, preview.tertiary).forEach { swatch ->
+                Box(
+                    modifier = Modifier
+                        .size(20.dp)
+                        .clip(CircleShape)
+                        .background(swatch),
+                )
+            }
+        }
+    }
+}
+
+private val DarkModePreference.labelRes: Int
+    get() = when (this) {
+        DarkModePreference.SYSTEM -> R.string.settings_dark_system
+        DarkModePreference.LIGHT -> R.string.settings_dark_light
+        DarkModePreference.DARK -> R.string.settings_dark_dark
+    }
+
+private val ColorSchemePreference.labelRes: Int
+    get() = when (this) {
+        ColorSchemePreference.DYNAMIC -> R.string.settings_scheme_dynamic
+        ColorSchemePreference.PETROL -> R.string.settings_scheme_petrol
+        ColorSchemePreference.FOREST -> R.string.settings_scheme_forest
+        ColorSchemePreference.AMBER -> R.string.settings_scheme_amber
+        ColorSchemePreference.PLUM -> R.string.settings_scheme_plum
+    }
 
 @Composable
 private fun RadiusSection(radiusKm: Int, onRadiusChange: (Int) -> Unit) {
@@ -312,7 +441,7 @@ private fun AboutSection(onOpenTankerkoenig: () -> Unit, onOpenLicence: () -> Un
 @Preview(showBackground = true)
 @Composable
 private fun SettingsScreenPreview() {
-    TankblickTheme(dynamicColor = false) {
+    TankblickPreviewTheme() {
         SettingsScreen(
             uiState = SettingsUiState(
                 settings = Settings(radiusKm = 8),
@@ -322,6 +451,8 @@ private fun SettingsScreenPreview() {
                     NavApp("net.osmand", "OsmAnd"),
                 ),
             ),
+            onDarkModeChange = {},
+            onColorSchemeChange = {},
             onRadiusChange = {},
             onNavAppChange = {},
             onReplaceApiKey = { true },

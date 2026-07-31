@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardActions
@@ -31,7 +32,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import de.mymiggi.tankblick.R
 import de.mymiggi.tankblick.ui.AppViewModelProvider
-import de.mymiggi.tankblick.ui.theme.TankblickTheme
+import de.mymiggi.tankblick.ui.theme.TankblickPreviewTheme
 
 private const val ONBOARDING_URL = "https://onboarding.tankerkoenig.de/"
 
@@ -75,6 +76,10 @@ private fun OnboardingContent(
     Column(
         modifier = modifier
             .fillMaxSize()
+            // No Scaffold on this screen, and edge-to-edge draws under the
+            // system bars: without this the title sits under the status bar
+            // and the keyboard covers the field.
+            .safeDrawingPadding()
             .verticalScroll(rememberScrollState())
             .padding(24.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
@@ -161,7 +166,7 @@ private fun OnboardingContent(
 @Preview(showBackground = true)
 @Composable
 private fun OnboardingContentPreview() {
-    TankblickTheme(dynamicColor = false) {
+    TankblickPreviewTheme() {
         OnboardingContent(
             input = "",
             showInvalidKeyError = false,
@@ -176,7 +181,7 @@ private fun OnboardingContentPreview() {
 @Preview(showBackground = true)
 @Composable
 private fun OnboardingContentErrorPreview() {
-    TankblickTheme(dynamicColor = false) {
+    TankblickPreviewTheme() {
         OnboardingContent(
             input = "kein-key",
             showInvalidKeyError = true,

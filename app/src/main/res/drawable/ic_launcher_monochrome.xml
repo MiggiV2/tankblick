@@ -1,0 +1,54 @@
+<!--
+    Themed-icon variant for Android 13+.
+
+    A monochrome layer is tinted by the launcher, so only alpha survives and
+    every colour collapses into one. The dark pupil of the full-colour icon
+    would therefore vanish into the white disc around it - here the disc is a
+    ring instead, drawn as a stroke, so the pupil stays a visible hole.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <path
+        android:pathData="M 23,62 A 31,31 0 0 1 85,62"
+        android:strokeWidth="6"
+        android:strokeColor="#FFFFFF"
+        android:strokeLineCap="round" />
+    <path
+        android:pathData="M 23,62 A 42,42 0 0 0 85,62"
+        android:strokeWidth="6"
+        android:strokeColor="#FFFFFF"
+        android:strokeAlpha="0.75"
+        android:strokeLineCap="round" />
+
+    <path
+        android:pathData="M 30.4,48.6 L 33.3,52"
+        android:strokeWidth="3.2"
+        android:strokeColor="#FFFFFF"
+        android:strokeLineCap="round" />
+    <path
+        android:pathData="M 54,39.5 L 54,44"
+        android:strokeWidth="3.2"
+        android:strokeColor="#FFFFFF"
+        android:strokeLineCap="round" />
+    <path
+        android:pathData="M 77.6,48.6 L 74.7,52"
+        android:strokeWidth="3.2"
+        android:strokeColor="#FFFFFF"
+        android:strokeLineCap="round" />
+
+    <path
+        android:pathData="M 54,62 L 39,47"
+        android:strokeWidth="6"
+        android:strokeColor="#FFFFFF"
+        android:strokeLineCap="round" />
+
+    <!-- Ring rather than disc, so the pupil reads as a hole once tinted. -->
+    <path
+        android:pathData="M 48.6,62 a 5.4,5.4 0 1,0 10.8,0 a 5.4,5.4 0 1,0 -10.8,0 Z"
+        android:strokeWidth="4.2"
+        android:strokeColor="#FFFFFF" />
+</vector>

@@ -39,7 +39,7 @@ import de.mymiggi.tankblick.location.LocationManagerSource
 import de.mymiggi.tankblick.ui.common.DataFooter
 import de.mymiggi.tankblick.ui.common.MessageBanner
 import de.mymiggi.tankblick.ui.common.StationRow
-import de.mymiggi.tankblick.ui.theme.TankblickTheme
+import de.mymiggi.tankblick.ui.theme.TankblickPreviewTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -188,7 +188,7 @@ private val SortMode.labelRes: Int
 @Preview(showBackground = true)
 @Composable
 private fun NearbyScreenPreview() {
-    TankblickTheme(dynamicColor = false) {
+    TankblickPreviewTheme() {
         NearbyScreen(
             uiState = NearbyUiState(
                 stations = listOf(

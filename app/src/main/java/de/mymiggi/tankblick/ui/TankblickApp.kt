@@ -14,7 +14,9 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
@@ -70,12 +72,21 @@ fun TankblickApp(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-    when (uiState) {
-        // Nothing on purpose: the key store answers within a frame or two, and
-        // a spinner would only flicker.
-        RootUiState.Loading -> Box(modifier.fillMaxSize())
-        RootUiState.NeedsApiKey -> Box(modifier.fillMaxSize()) { OnboardingScreen() }
-        RootUiState.Ready -> MainScaffold(modifier)
+    // Surface, not a bare Box: it is what sets LocalContentColor from the
+    // scheme. Without it text falls back to black while the platform theme
+    // paints the window dark, which made onboarding nearly unreadable in dark
+    // mode. The Ready branch was fine only because Scaffold brings its own.
+    Surface(
+        modifier = modifier.fillMaxSize(),
+        color = MaterialTheme.colorScheme.background,
+    ) {
+        when (uiState) {
+            // Nothing on purpose: the key store answers within a frame or two,
+            // and a spinner would only flicker.
+            RootUiState.Loading -> Box(Modifier.fillMaxSize())
+            RootUiState.NeedsApiKey -> OnboardingScreen()
+            RootUiState.Ready -> MainScaffold()
+        }
     }
 }
 
@@ -211,6 +222,8 @@ private fun SettingsTab(
 
     SettingsScreen(
         uiState = uiState,
+        onDarkModeChange = viewModel::setDarkMode,
+        onColorSchemeChange = viewModel::setColorScheme,
         onRadiusChange = viewModel::setRadiusKm,
         onNavAppChange = viewModel::setNavApp,
         onReplaceApiKey = viewModel::replaceApiKey,

@@ -4,9 +4,9 @@ Schnelle, datensparsame Spritpreis-App für Deutschland. Zeigt aktuelle Preise f
 E5, E10 und Diesel aus der [Tankerkönig-API](https://creativecommons.tankerkoenig.de/)
 (Daten der Markttransparenzstelle für Kraftstoffe des Bundeskartellamts).
 
-> **Status:** in Entwicklung. Onboarding, Umkreissuche, Favoriten,
-> Detailansicht, Navigation und Einstellungen sind implementiert und getestet
-> (168 Unit-Tests, 26 instrumentierte Tests).
+> **Status:** 0.2.0. Onboarding, Umkreissuche, Favoriten, Detailansicht,
+> Navigation und Einstellungen sind implementiert und getestet
+> (178 Unit-Tests, 26 instrumentierte Tests).
 
 ## Warum noch eine Tankpreis-App?
 
@@ -32,8 +32,10 @@ E5, E10 und Diesel aus der [Tankerkönig-API](https://creativecommons.tankerkoen
   Favoriten-Umschalter mit eigenem Label, Navigations-Button.
 - **Navigation** über einen einfachen `geo:`-Intent — entweder die in den
   Einstellungen gewählte App oder der System-Dialog.
-- **Einstellungen:** Suchradius (1–25 km), Wahl der Navigations-App,
-  API-Key (maskiert, austauschbar, löschbar), Info-/Datenschutz-Abschnitt.
+- **Einstellungen:** Darstellung (hell, dunkel oder wie das System) und vier
+  Farbschemata neben dem dynamischen Material-Theme, Suchradius (1–25 km),
+  Wahl der Navigations-App, API-Key (maskiert, austauschbar, löschbar),
+  Info-/Datenschutz-Abschnitt.
 - **Offline-first:** Room-Cache, jeder Bildschirm zeigt das Alter seiner
   Daten, ein fehlgeschlagener Refresh leert den Cache nie, Preisverlauf wird
   beim Start nach 30 Tagen bereinigt.
@@ -51,9 +53,16 @@ E5, E10 und Diesel aus der [Tankerkönig-API](https://creativecommons.tankerkoen
 | Favoriten, Einstellungen, Preis-Cache | Ausschließlich lokal (Room/DataStore). |
 | Analytics, Crash-Reporting, Werbung | Gibt es nicht. |
 
-Die App fordert genau drei Berechtigungen an: `INTERNET`,
-`ACCESS_COARSE_LOCATION` und `ACCESS_FINE_LOCATION`. Ohne Standortfreigabe
-bleibt sie nutzbar — dann eben mit Favoriten statt Umkreissuche.
+Die App fordert drei Berechtigungen an: `INTERNET`, `ACCESS_COARSE_LOCATION`
+und `ACCESS_FINE_LOCATION`. Ohne Standortfreigabe bleibt sie nutzbar — dann
+eben mit Favoriten statt Umkreissuche.
+
+Im fertigen APK steht eine vierte: `de.mymiggi.tankblick.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION`.
+Die deklariert `androidx.core` selbst und die App vergibt sie an sich selbst
+(Schutzlevel `signature`), damit ab API 33 registrierte Broadcast-Receiver nicht
+exportiert werden. Sie gewährt keinen Zugriff auf irgendetwas außerhalb der App
+und lässt sich nicht abwählen — sie taucht nur auf, weil AGP sie beim Mergen der
+Manifeste einfügt.
 
 ## API-Key
 
@@ -110,8 +119,7 @@ Kotlin-Compiler auf dem Klassenpfad streiten.
 
 Store-Texte und Changelogs für F-Droid liegen unter
 `fastlane/metadata/android/{de-DE,en-US}/` (Titel, Kurz- und Langbeschreibung,
-Changelog pro Versionscode). Screenshots fehlen noch — die erwarteten Pfade
-stehen in [RELEASING.md](RELEASING.md).
+Changelog pro Versionscode, Icon und Screenshots in beiden Sprachen).
 
 Der Ablauf für einen Release und die Aufnahme ins F-Droid-Repo ist in
 [RELEASING.md](RELEASING.md) beschrieben, inklusive der Punkte, die für einen

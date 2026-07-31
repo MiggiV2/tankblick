@@ -57,6 +57,16 @@
     <string name="action_navigate">Navigate</string>
 
     <!-- Settings -->
+    <string name="settings_appearance">Appearance</string>
+    <string name="settings_dark_system">System</string>
+    <string name="settings_dark_light">Light</string>
+    <string name="settings_dark_dark">Dark</string>
+    <string name="settings_color_scheme">Colour scheme</string>
+    <string name="settings_scheme_dynamic">Dynamic (wallpaper)</string>
+    <string name="settings_scheme_petrol">Petrol</string>
+    <string name="settings_scheme_forest">Forest</string>
+    <string name="settings_scheme_amber">Amber</string>
+    <string name="settings_scheme_plum">Plum</string>
     <string name="settings_radius">Search radius</string>
     <plurals name="settings_radius_value">
         <item quantity="one">%1$d kilometre</item>

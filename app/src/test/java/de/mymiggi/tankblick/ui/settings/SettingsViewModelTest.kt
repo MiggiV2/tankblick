@@ -8,6 +8,8 @@ import de.mymiggi.tankblick.data.prefs.ApiKeyStore
 import de.mymiggi.tankblick.data.prefs.FakeSecretCipher
 import de.mymiggi.tankblick.data.prefs.SettingsStore
 import de.mymiggi.tankblick.domain.ApiKey
+import de.mymiggi.tankblick.domain.ColorSchemePreference
+import de.mymiggi.tankblick.domain.DarkModePreference
 import de.mymiggi.tankblick.navapp.NavApp
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.cancel
@@ -131,6 +133,24 @@ class SettingsViewModelTest {
         viewModel.setNavApp(null)
 
         assertNull(viewModel.uiState.value.settings.navAppPackage)
+    }
+
+    @Test
+    fun `remembers the dark mode choice`() = runTest {
+        val viewModel = viewModel()
+
+        viewModel.setDarkMode(DarkModePreference.DARK)
+
+        assertEquals(DarkModePreference.DARK, viewModel.uiState.value.settings.darkMode)
+    }
+
+    @Test
+    fun `remembers the colour scheme`() = runTest {
+        val viewModel = viewModel()
+
+        viewModel.setColorScheme(ColorSchemePreference.AMBER)
+
+        assertEquals(ColorSchemePreference.AMBER, viewModel.uiState.value.settings.colorScheme)
     }
 
     @Test

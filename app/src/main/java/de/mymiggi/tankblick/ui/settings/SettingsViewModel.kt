@@ -6,6 +6,8 @@ import de.mymiggi.tankblick.data.prefs.ApiKeyStore
 import de.mymiggi.tankblick.data.prefs.Settings
 import de.mymiggi.tankblick.data.prefs.SettingsStore
 import de.mymiggi.tankblick.domain.ApiKey
+import de.mymiggi.tankblick.domain.ColorSchemePreference
+import de.mymiggi.tankblick.domain.DarkModePreference
 import de.mymiggi.tankblick.navapp.NavApp
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -55,6 +57,14 @@ class SettingsViewModel(
     /** Re-queried on every visit, because apps get installed and removed. */
     fun refreshNavApps() {
         navApps.value = loadNavApps()
+    }
+
+    fun setDarkMode(darkMode: DarkModePreference) {
+        viewModelScope.launch { settingsStore.setDarkMode(darkMode) }
+    }
+
+    fun setColorScheme(colorScheme: ColorSchemePreference) {
+        viewModelScope.launch { settingsStore.setColorScheme(colorScheme) }
     }
 
     fun setRadiusKm(radiusKm: Int) {

@@ -1,0 +1,43 @@
+<!--
+  Tankblick logo: a fuel gauge that reads as an eye.
+
+  The upper arc doubles as the gauge scale and the eyelid, the needle is the
+  direction of the glance, and the pivot is the pupil. Two readings, one shape,
+  which is what the name asks for.
+
+  Deliberately not an all-seeing eye in a triangle: that iconography now reads
+  as conspiracy imagery, and an app whose whole pitch is "we do not watch you"
+  should not wear the symbol for watching.
+
+  Laid out on a 108x108 grid so it drops straight into an Android adaptive
+  icon. The motif stays inside the centre 66x66 safe zone that every launcher
+  mask keeps visible, and is optically centred rather than centred on the
+  bounding box - the lower lid is lighter, so the mass sits high otherwise.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" width="108" height="108" viewBox="0 0 108 108">
+
+  <!-- Eyelid / gauge scale: the upper arc. -->
+  <path d="M 23 62 A 31 31 0 0 1 85 62"
+        fill="none" stroke="#97F0FF" stroke-width="6" stroke-linecap="round" />
+
+  <!-- Lower lid: a shallower arc closing the almond. Carries enough weight to
+       be read as a lid rather than dismissed as a shadow. -->
+  <path d="M 23 62 A 42 42 0 0 0 85 62"
+        fill="none" stroke="#97F0FF" stroke-width="6" stroke-linecap="round"
+        opacity="0.75" />
+
+  <!-- Scale ticks: E on the left, full on the right. -->
+  <g stroke="#97F0FF" stroke-width="3.2" stroke-linecap="round" opacity="0.85">
+    <line x1="30.4" y1="48.6" x2="33.3" y2="52.0" />
+    <line x1="54.0" y1="39.5" x2="54.0" y2="44.0" />
+    <line x1="77.6" y1="48.6" x2="74.7" y2="52.0" />
+  </g>
+
+  <!-- Needle: points up and left, towards a full tank and a cheap price. -->
+  <path d="M 54 62 L 39 47"
+        stroke="#FFFFFF" stroke-width="6" stroke-linecap="round" />
+
+  <!-- Pupil / pivot. -->
+  <circle cx="54" cy="62" r="7.5" fill="#FFFFFF" />
+  <circle cx="54" cy="62" r="3.2" fill="#00363D" />
+</svg>

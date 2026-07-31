@@ -4,6 +4,8 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
+import de.mymiggi.tankblick.domain.ColorSchemePreference
+import de.mymiggi.tankblick.domain.DarkModePreference
 import de.mymiggi.tankblick.domain.FuelType
 import de.mymiggi.tankblick.domain.SortMode
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -52,6 +54,35 @@ class SettingsStoreTest {
         assertEquals(5, settings.radiusKm)
         assertEquals(SortMode.PRICE, settings.sortMode)
         assertNull(settings.navAppPackage)
+        assertEquals(DarkModePreference.SYSTEM, settings.darkMode)
+        assertEquals(ColorSchemePreference.DYNAMIC, settings.colorScheme)
+    }
+
+    @Test
+    fun `remembers the dark mode choice`() = runTest {
+        store.setDarkMode(DarkModePreference.DARK)
+
+        assertEquals(DarkModePreference.DARK, store.settings.first().darkMode)
+    }
+
+    @Test
+    fun `remembers the colour scheme`() = runTest {
+        store.setColorScheme(ColorSchemePreference.FOREST)
+
+        assertEquals(ColorSchemePreference.FOREST, store.settings.first().colorScheme)
+    }
+
+    /** An enum renamed or removed in a later build must not brick the app. */
+    @Test
+    fun `falls back to defaults when a stored theme name is unknown`() = runTest {
+        dataStore.edit {
+            it[SettingsStore.DARK_MODE] = "SEPIA"
+            it[SettingsStore.COLOR_SCHEME] = "NEON"
+        }
+
+        val settings = store.settings.first()
+        assertEquals(DarkModePreference.SYSTEM, settings.darkMode)
+        assertEquals(ColorSchemePreference.DYNAMIC, settings.colorScheme)
     }
 
     @Test

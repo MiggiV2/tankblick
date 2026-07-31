@@ -5,6 +5,8 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
+import de.mymiggi.tankblick.domain.ColorSchemePreference
+import de.mymiggi.tankblick.domain.DarkModePreference
 import de.mymiggi.tankblick.domain.FuelType
 import de.mymiggi.tankblick.domain.SortMode
 import kotlinx.coroutines.flow.Flow
@@ -17,6 +19,8 @@ data class Settings(
     val sortMode: SortMode = SortMode.PRICE,
     /** Package of the preferred navigation app; `null` means "ask every time". */
     val navAppPackage: String? = null,
+    val darkMode: DarkModePreference = DarkModePreference.SYSTEM,
+    val colorScheme: ColorSchemePreference = ColorSchemePreference.DYNAMIC,
 ) {
     companion object {
         const val DEFAULT_RADIUS_KM = 5
@@ -39,6 +43,8 @@ class SettingsStore(
             radiusKm = (prefs[RADIUS_KM] ?: Settings.DEFAULT_RADIUS_KM).clampRadius(),
             sortMode = prefs[SORT_MODE].toSortMode(),
             navAppPackage = prefs[NAV_APP_PACKAGE],
+            darkMode = prefs[DARK_MODE].toDarkMode(),
+            colorScheme = ColorSchemePreference.fromName(prefs[COLOR_SCHEME]),
         )
     }
 
@@ -52,6 +58,14 @@ class SettingsStore(
 
     suspend fun setSortMode(sortMode: SortMode) {
         dataStore.edit { it[SORT_MODE] = sortMode.name }
+    }
+
+    suspend fun setDarkMode(darkMode: DarkModePreference) {
+        dataStore.edit { it[DARK_MODE] = darkMode.name }
+    }
+
+    suspend fun setColorScheme(colorScheme: ColorSchemePreference) {
+        dataStore.edit { it[COLOR_SCHEME] = colorScheme.name }
     }
 
     suspend fun setNavAppPackage(packageName: String?) {
@@ -69,10 +83,15 @@ class SettingsStore(
     private fun String?.toSortMode(): SortMode =
         SortMode.entries.firstOrNull { it.name == this } ?: SortMode.PRICE
 
+    private fun String?.toDarkMode(): DarkModePreference =
+        DarkModePreference.entries.firstOrNull { it.name == this } ?: DarkModePreference.SYSTEM
+
     companion object {
         val FUEL_TYPE = stringPreferencesKey("fuel_type")
         val RADIUS_KM = intPreferencesKey("radius_km")
         val SORT_MODE = stringPreferencesKey("sort_mode")
         val NAV_APP_PACKAGE = stringPreferencesKey("nav_app_package")
+        val DARK_MODE = stringPreferencesKey("dark_mode")
+        val COLOR_SCHEME = stringPreferencesKey("color_scheme")
     }
 }
