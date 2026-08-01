@@ -3,6 +3,9 @@ name: Build Tankblick
 on:
   push:
   pull_request:
+  # So a run can be repeated after a runner or network hiccup without an
+  # empty commit to trigger it.
+  workflow_dispatch:
 
 jobs:
   build:
