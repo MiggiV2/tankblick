@@ -57,24 +57,3 @@ jobs:
 
       - name: Assemble debug APK
         run: ./gradlew assembleDebug
-
-      # Uploaded even when a step above failed - a red build is exactly when
-      # the lint HTML and the JUnit XML are worth reading.
-      - name: Upload reports
-        if: always()
-        uses: https://github.com/actions/upload-artifact@v4
-        with:
-          name: reports
-          path: |
-            app/build/reports/
-            app/build/test-results/
-          retention-days: 7
-          if-no-files-found: warn
-
-      - name: Upload debug APK
-        if: success()
-        uses: https://github.com/actions/upload-artifact@v4
-        with:
-          name: tankblick-debug-apk
-          path: app/build/outputs/apk/debug/*.apk
-          retention-days: 7
