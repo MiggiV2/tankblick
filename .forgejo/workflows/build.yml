@@ -36,24 +36,19 @@ jobs:
         with:
           packages: ''
 
-      # AGP pulls the compile SDK and build tools on first use, which is a
-      # couple of hundred megabytes per run. Keyed on the build script, because
-      # that is what names the versions being downloaded.
-      - name: Cache Android SDK components
-        uses: https://github.com/actions/cache@v4
-        with:
-          path: |
-            ${{ env.ANDROID_HOME }}/platforms
-            ${{ env.ANDROID_HOME }}/build-tools
-          key: android-sdk-${{ hashFiles('app/build.gradle.kts', 'gradle/libs.versions.toml') }}
-          restore-keys: |
-            android-sdk-
-
-      - name: Run unit tests
-        run: ./gradlew testDebugUnitTest
-
-      - name: Run lint
-        run: ./gradlew lint
-
-      - name: Assemble debug APK
-        run: ./gradlew assembleDebug
+      # One invocation rather than three. The step named "run unit tests" was
+      # taking five minutes for 0.6 seconds of actual tests - it was the first
+      # Gradle call paying for KSP and the whole Kotlin compile. Splitting that
+      # across three calls only added JVM cold starts; the configuration cache
+      # already covered the rest.
+      #
+      # The worker count and heap override gradle.properties, which is tuned to
+      # leave a desktop responsive. This container has three CPUs and four
+      # gigabytes to itself and no one waiting on it. Note that overriding
+      # org.gradle.jvmargs replaces the value rather than merging, so the
+      # encoding has to be repeated.
+      - name: Build and test
+        run: >-
+          ./gradlew testDebugUnitTest lint assembleDebug
+          --max-workers=3
+          -Dorg.gradle.jvmargs="-Xmx2560m -Dfile.encoding=UTF-8"
