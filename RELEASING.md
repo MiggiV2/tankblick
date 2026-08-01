@@ -48,6 +48,63 @@ keyAlias=tankblick
 keyPassword=…
 ```
 
+Damit baut [`scripts/release-apk.sh`](scripts/release-apk.sh) die verteilbare
+APK:
+
+```sh
+./scripts/release-apk.sh
+# → build/release/tankblick-2-universal-release.apk
+```
+
+Das Skript macht einen Clean-Build, liest `versionCode` und die enthaltenen
+ABIs per `aapt2` aus der **fertigen** APK, benennt sie danach und prüft mit
+`apksigner`, dass sie wirklich signiert ist. Fehlt `keystore.properties`,
+bricht es ab statt eine unsignierte Datei „release" zu nennen. Zusätzliche
+Argumente gehen unverändert an Gradle durch.
+
+Die Parsing-Logik hat Tests: `scripts/release-apk.test.sh` (kein Gradle, kein
+SDK, kein Schlüssel nötig).
+
+Soll ein API-Key mit einkompiliert werden, gehört er in die **Umgebung**, nicht
+auf die Kommandozeile — das Skript gibt die Gradle-Argumente aus, die Umgebung
+nicht:
+
+```sh
+export TANKBLICK_API_KEY=<uuid>
+./scripts/release-apk.sh
+```
+
+Ohne die Variable bleibt `BuildConfig.API_KEY` leer und die App fragt im
+Onboarding nach einem Key.
+
+`universal` steht im Namen, weil die APK alle vier ABIs enthält — sie bringt
+zwei fremde native Libraries mit (`libandroidx.graphics.path.so` aus Compose,
+`libdatastore_shared_counter.so` aus DataStore) und es sind keine ABI-Splits
+konfiguriert. Käme es je zu Splits, setzt das Skript den echten ABI ein.
+
+### Ins eigene F-Droid-Repo veröffentlichen
+
+Nach dem Build fragt das Skript, ob die APK ins eigene Repo soll, und ruft dann
+`publish-fdroid.sh` aus `~/git/private/fdroid-repo` mit dem absoluten Pfad der
+APK auf. Das kopiert sie nach `repo/`, signiert den Index neu und schiebt alles
+in den k3s-Cluster.
+
+Die Frage kommt nur an einem Terminal. In einer Pipeline oder in CI baut das
+Skript und hört danach auf — Veröffentlichen ist keine Nebenwirkung eines
+Builds.
+
+```sh
+./scripts/release-apk.sh                 # baut, fragt danach
+./scripts/release-apk.sh --publish       # baut und veröffentlicht ohne Rückfrage
+./scripts/release-apk.sh --no-publish    # baut und fragt nichts
+```
+
+Liegt das Repo woanders, sagt `TANKBLICK_FDROID_REPO=/pfad/zum/checkout` wo.
+
+Das eigene Repo ist unabhängig von f-droid.org: dort signierst **du**, hier
+signiert F-Droid nach eigenem Rebuild. Dieselbe App aus beiden Quellen hat
+verschiedene Signaturen und lässt sich nicht übereinander installieren.
+
 Existiert die Datei nicht, bleibt `assembleRelease` unsigniert statt
 fehlzuschlagen. Das ist Absicht: ein frischer Clone und CI sollen bauen können.
 
