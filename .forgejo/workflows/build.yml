@@ -23,6 +23,10 @@ jobs:
         with:
           java-version: '21'
           distribution: 'temurin'
+          # Caches ~/.gradle/caches and the wrapper distribution, keyed on the
+          # build scripts. The runner has its cache server enabled, so this
+          # works without an external cache backend.
+          cache: gradle
 
       # Installs the command line tools and accepts the licences. The platform
       # and build tools themselves are left to AGP, which downloads exactly the
@@ -32,6 +36,19 @@ jobs:
         with:
           packages: ''
 
+      # AGP pulls the compile SDK and build tools on first use, which is a
+      # couple of hundred megabytes per run. Keyed on the build script, because
+      # that is what names the versions being downloaded.
+      - name: Cache Android SDK components
+        uses: https://github.com/actions/cache@v4
+        with:
+          path: |
+            ${{ env.ANDROID_HOME }}/platforms
+            ${{ env.ANDROID_HOME }}/build-tools
+          key: android-sdk-${{ hashFiles('app/build.gradle.kts', 'gradle/libs.versions.toml') }}
+          restore-keys: |
+            android-sdk-
+
       - name: Run unit tests
         run: ./gradlew testDebugUnitTest
 
@@ -40,3 +57,24 @@ jobs:
 
       - name: Assemble debug APK
         run: ./gradlew assembleDebug
+
+      # Uploaded even when a step above failed - a red build is exactly when
+      # the lint HTML and the JUnit XML are worth reading.
+      - name: Upload reports
+        if: always()
+        uses: https://github.com/actions/upload-artifact@v4
+        with:
+          name: reports
+          path: |
+            app/build/reports/
+            app/build/test-results/
+          retention-days: 7
+          if-no-files-found: warn
+
+      - name: Upload debug APK
+        if: success()
+        uses: https://github.com/actions/upload-artifact@v4
+        with:
+          name: tankblick-debug-apk
+          path: app/build/outputs/apk/debug/*.apk
+          retention-days: 7
