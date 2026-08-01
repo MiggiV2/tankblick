@@ -127,4 +127,24 @@ class OnboardingViewModelTest {
         assertEquals(ApiKey.DEMO_KEY, stored?.value)
         assertTrue(stored!!.isDemo)
     }
+
+    @Test
+    fun `says nothing about a build key on a first run`() = runTest {
+        assertFalse(viewModel.uiState.value.buildKeyRejected)
+    }
+
+    /**
+     * Someone who never entered a key would otherwise be dropped into a screen
+     * asking for one, with no idea why the app stopped working.
+     */
+    @Test
+    fun `explains itself when the key shipped with the build stopped working`() = runTest {
+        val buildKey = ApiKey.parse("11111111-2222-3333-4444-555555555555")!!
+        val store = ApiKeyStore(dataStore, FakeSecretCipher(), buildKey)
+        store.reportRejected(buildKey)
+
+        val viewModel = OnboardingViewModel(store)
+
+        assertTrue(viewModel.uiState.value.buildKeyRejected)
+    }
 }

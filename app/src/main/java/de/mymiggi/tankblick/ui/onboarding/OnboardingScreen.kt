@@ -12,6 +12,8 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
@@ -51,6 +53,7 @@ fun OnboardingScreen(
     OnboardingContent(
         input = uiState.input,
         showInvalidKeyError = uiState.showInvalidKeyError,
+        buildKeyRejected = uiState.buildKeyRejected,
         onInputChange = viewModel::onInputChange,
         onSubmit = viewModel::onSubmit,
         onUseDemoKey = viewModel::onUseDemoKey,
@@ -65,6 +68,7 @@ fun OnboardingScreen(
 private fun OnboardingContent(
     input: String,
     showInvalidKeyError: Boolean,
+    buildKeyRejected: Boolean,
     onInputChange: (String) -> Unit,
     onSubmit: () -> Unit,
     onUseDemoKey: () -> Unit,
@@ -84,6 +88,23 @@ private fun OnboardingContent(
             .padding(24.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
+        // Only for someone who never entered a key: the app worked yesterday
+        // and is now asking for something they were never asked for before.
+        // Without a reason on screen that reads like a defect.
+        if (buildKeyRejected) {
+            Card(
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.errorContainer,
+                ),
+            ) {
+                Text(
+                    text = stringResource(R.string.onboarding_build_key_rejected),
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.padding(16.dp),
+                )
+            }
+        }
+
         Text(
             text = stringResource(R.string.onboarding_title),
             style = MaterialTheme.typography.headlineMedium,
@@ -170,6 +191,7 @@ private fun OnboardingContentPreview() {
         OnboardingContent(
             input = "",
             showInvalidKeyError = false,
+            buildKeyRejected = false,
             onInputChange = {},
             onSubmit = {},
             onUseDemoKey = {},
@@ -185,6 +207,7 @@ private fun OnboardingContentErrorPreview() {
         OnboardingContent(
             input = "kein-key",
             showInvalidKeyError = true,
+            buildKeyRejected = false,
             onInputChange = {},
             onSubmit = {},
             onUseDemoKey = {},

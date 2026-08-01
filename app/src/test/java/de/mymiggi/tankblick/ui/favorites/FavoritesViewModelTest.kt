@@ -16,6 +16,7 @@ import de.mymiggi.tankblick.ui.nearby.NearbyMessage
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -209,5 +210,22 @@ class FavoritesViewModelTest {
         viewModel.dismissMessage()
 
         assertNull(viewModel.uiState.value.message)
+    }
+
+    /** Favourites refresh on their own screen, so they need the same escape hatch. */
+    @Test
+    fun `hands over to onboarding when the build key is rejected`() = runTest {
+        val buildKey = ApiKey.parse("11111111-2222-3333-4444-555555555555")!!
+        val secrets: DataStore<Preferences> = PreferenceDataStoreFactory.create(scope = storeScope) {
+            tempFolder.newFile("build-key.preferences_pb")
+        }
+        val store = ApiKeyStore(secrets, FakeSecretCipher(), buildKey)
+        repository.favorites.value = listOf(station("a"))
+        repository.favoritesResult = ApiResult.InvalidKey
+        val viewModel = FavoritesViewModel(repository, store, settingsStore)
+
+        viewModel.refresh()
+
+        assertNull(store.apiKey.first())
     }
 }

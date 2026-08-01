@@ -16,6 +16,7 @@
     <string name="onboarding_key_invalid">Das sieht nicht nach einem Tankerkönig-Key aus. Erwartet wird eine UUID mit 36 Zeichen.</string>
     <string name="onboarding_save">Key speichern</string>
     <string name="onboarding_use_demo_key">Erstmal mit Demo-Key ausprobieren</string>
+    <string name="onboarding_build_key_rejected">Der Key, der mit dieser App-Version ausgeliefert wurde, wird von Tankerkönig nicht mehr akzeptiert. Trag bitte einen eigenen ein — oder probier es solange mit dem Demo-Key.</string>
     <string name="onboarding_privacy_note">Der Key bleibt auf diesem Gerät: verschlüsselt im Android-Keystore, ausgenommen von Cloud-Backup und Geräteübertragung.</string>
 
     <!-- Fuel types and sorting -->

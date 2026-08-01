@@ -72,8 +72,10 @@ class FavoritesViewModel(
                 return@launch
             }
 
-            transientState.value =
-                TransientState(message = stationRepository.refreshFavorites(apiKey).toMessage())
+            val result = stationRepository.refreshFavorites(apiKey)
+            if (result is ApiResult.InvalidKey) apiKeyStore.reportRejected(apiKey)
+
+            transientState.value = TransientState(message = result.toMessage())
         }
     }
 

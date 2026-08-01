@@ -166,6 +166,25 @@ class NearbyViewModelTest {
         assertEquals(NearbyMessage.LocationUnavailable, viewModel.uiState.value.message)
     }
 
+    /**
+     * A key baked into the build is not something the user can correct from the
+     * settings screen, so a rejection has to hand them onboarding rather than a
+     * banner they can only dismiss.
+     */
+    @Test
+    fun `hands over to onboarding when the build key is rejected`() = runTest {
+        val buildKey = ApiKey.parse("11111111-2222-3333-4444-555555555555")!!
+        val store = ApiKeyStore(secretsStore, FakeSecretCipher(), buildKey)
+        locationSource.result = LocationResult.Available(52.5, 13.4)
+        repository.nearbyResult = ApiResult.InvalidKey
+        val viewModel = NearbyViewModel(repository, store, settingsStore, locationSource)
+
+        viewModel.refresh()
+        runCurrent()
+
+        assertNull(store.apiKey.first())
+    }
+
     /** A countdown is understandable; a bare error is not. */
     @Test
     fun `surfaces the wait when the rate limiter blocks a refresh`() = runTest {

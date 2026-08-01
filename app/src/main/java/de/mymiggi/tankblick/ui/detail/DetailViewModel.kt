@@ -87,7 +87,10 @@ class DetailViewModel(
                 }
 
                 // The cached station stays on screen; only the hours are missing.
-                else -> transientState.value = TransientState(message = result.toMessage())
+                else -> {
+                    if (result is ApiResult.InvalidKey) apiKeyStore.reportRejected(apiKey)
+                    transientState.value = TransientState(message = result.toMessage())
+                }
             }
         }
     }

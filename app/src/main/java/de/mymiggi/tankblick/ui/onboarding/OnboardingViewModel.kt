@@ -13,6 +13,8 @@ import kotlinx.coroutines.launch
 data class OnboardingUiState(
     val input: String = "",
     val showInvalidKeyError: Boolean = false,
+    /** This screen is only back because the key shipped with the build died. */
+    val buildKeyRejected: Boolean = false,
 )
 
 class OnboardingViewModel(
@@ -21,6 +23,14 @@ class OnboardingViewModel(
 
     private val _uiState = MutableStateFlow(OnboardingUiState())
     val uiState: StateFlow<OnboardingUiState> = _uiState.asStateFlow()
+
+    init {
+        viewModelScope.launch {
+            apiKeyStore.buildKeyRejected.collect { rejected ->
+                _uiState.update { it.copy(buildKeyRejected = rejected) }
+            }
+        }
+    }
 
     fun onInputChange(value: String) {
         _uiState.update { it.copy(input = value, showInvalidKeyError = false) }

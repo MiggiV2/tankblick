@@ -72,15 +72,15 @@ Zwei Clean-Builds sollten dieselbe APK ergeben:
 
 ## Screenshots für F-Droid
 
-Noch offen. Erwartet werden sie unter:
+Je vier Stück pro Sprache liegen bereits unter:
 
 ```
 fastlane/metadata/android/de-DE/images/phoneScreenshots/1.png
 fastlane/metadata/android/en-US/images/phoneScreenshots/1.png
 ```
 
-Sinnvolle Motive: Umkreisliste, Detailansicht, Favoriten, Einstellungen.
-Aufnehmen lassen sie sich mit einem laufenden Emulator über
+Motive: Umkreisliste, Detailansicht, Favoriten, Einstellungen.
+Neue aufnehmen lassen sie sich mit einem laufenden Emulator über
 
 ```sh
 adb exec-out screencap -p > 1.png
@@ -97,14 +97,47 @@ F-Droid-Metadaten liegen **nicht** in diesem Repo, sondern als Rezeptur in
   `Builds:` mit `versionName`/`versionCode`/`commit`/`gradle: yes`
 - `AutoUpdateMode: Version` und `UpdateCheckMode: Tags`, damit neue Tags
   automatisch erkannt werden
-- Lizenz `GPL-3.0-or-later`, Kategorie z. B. `Navigation` oder `Money`
+- Lizenz `GPL-3.0-or-later`, Kategorien `Market & Price` und `Navigation`
 
 Die Beschreibungstexte zieht F-Droid aus `fastlane/metadata/` in diesem Repo.
 
-Anti-Features sollten keine nötig sein: keine Werbung, kein Tracking, keine
-proprietären Abhängigkeiten. Die App braucht allerdings einen Netzwerkdienst
-(Tankerkönig) und einen personenbezogenen API-Key — das gehört in die
-Beschreibung, ist aber kein Anti-Feature.
+`Repo` zeigt auf den GitHub-Mirror, nicht auf Forgejo: der Buildserver klont
+bei jedem Build, und dafür zählt Verfügbarkeit. `SourceCode`, `IssueTracker`
+und `Changelog` bleiben auf `code.mymiggi.de` — dort wird entwickelt.
+
+### Anti-Feature
+
+`NonFreeNet` ist gesetzt und bleibt es. Die App hängt vollständig an der
+Tankerkönig-API, deren Serverseite nicht offen ist, und es gibt keine freie
+Alternative, auf die sie ausweichen könnte. Dieselbe Einstufung hat
+`org.woheller69.spritpreise`, das die gleiche API nutzt.
+
+### Mitgelieferter API-Key
+
+Damit F-Droid-Nutzerinnen nicht durchs Onboarding müssen, wird ein Key beim
+Bauen einkompiliert — über `gradleprops` in der Rezeptur:
+
+```yaml
+    gradleprops:
+      - tankblick.apiKey=<uuid>
+```
+
+Wird der Key später gesperrt, antwortet die API mit `ok: false` (oder 401/403).
+Die App merkt sich genau diesen Key als abgelehnt, fällt auf das Onboarding
+zurück und erklärt dort, warum. Ein Key, den die Nutzerin selbst eingetragen
+hat, gewinnt immer und wird nie verworfen.
+
+### Offen vor der Einreichung
+
+- [ ] Tag `v<versionName>` anlegen und pushen — ohne ihn ist `commit:` ins Leere
+      gezeigt und die fdroiddata-CI schlägt fehl.
+- [ ] `commit:` auf den vollen Hash setzen, nicht auf den Tag-Namen. Die
+      F-Droid-Maintainer bestehen bei neuen Apps darauf.
+- [ ] Dummy-Key `00000000-0000-0000-0000-000000000000` in `gradleprops` durch
+      den echten Key ersetzen.
+- [ ] Build lokal gegenprüfen: `fdroid build de.mymiggi.tankblick`. AGP 9.x,
+      Gradle 9.5 und compileSdk 37 sind neu genug, dass der Buildserver
+      stolpern kann.
 
 ## Nach dem Release
 

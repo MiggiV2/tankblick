@@ -17,6 +17,7 @@ import de.mymiggi.tankblick.ui.nearby.NearbyMessage
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -216,5 +217,20 @@ class DetailViewModelTest {
         viewModel.dismissMessage()
 
         assertNull(viewModel.uiState.value.message)
+    }
+
+    /** The detail screen loads on open, so it can be the first to see a dead key. */
+    @Test
+    fun `hands over to onboarding when the build key is rejected`() = runTest {
+        val buildKey = ApiKey.parse("11111111-2222-3333-4444-555555555555")!!
+        val secrets: DataStore<Preferences> = PreferenceDataStoreFactory.create(scope = storeScope) {
+            tempFolder.newFile("build-key.preferences_pb")
+        }
+        val store = ApiKeyStore(secrets, FakeSecretCipher(), buildKey)
+        repository.detailResult = ApiResult.InvalidKey
+
+        DetailViewModel("a", repository, store)
+
+        assertNull(store.apiKey.first())
     }
 }

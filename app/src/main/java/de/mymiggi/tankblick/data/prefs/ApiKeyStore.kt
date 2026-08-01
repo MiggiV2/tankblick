@@ -6,6 +6,7 @@ import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import de.mymiggi.tankblick.domain.ApiKey
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 
@@ -47,8 +48,23 @@ class ApiKeyStore(
             key
         }
 
+    /**
+     * [buildKey], unless the API has already refused it.
+     *
+     * The rejection is remembered against the key's value rather than as a bare
+     * flag, so a later version that ships a working key is not locked out by
+     * something its predecessor wrote.
+     */
+    private val usableBuildKey: Flow<ApiKey?> = dataStore.data
+        .map { it[REJECTED_BUILD_KEY] }
+        .distinctUntilChanged()
+        .map { rejected -> buildKey?.takeIf { it.value != rejected } }
+
     /** The key to make requests with: the user's own, otherwise [buildKey]. */
-    val apiKey: Flow<ApiKey?> = userApiKey.map { it ?: buildKey }
+    val apiKey: Flow<ApiKey?> = combine(userApiKey, usableBuildKey) { user, build -> user ?: build }
+
+    /** True once [buildKey] has been refused, so onboarding can say why it is back. */
+    val buildKeyRejected: Flow<Boolean> = usableBuildKey.map { buildKey != null && it == null }
 
     suspend fun save(key: ApiKey) {
         dataStore.edit { it[API_KEY] = cipher.encrypt(key.value) }
@@ -58,7 +74,23 @@ class ApiKeyStore(
         dataStore.edit { it.remove(API_KEY) }
     }
 
+    /**
+     * Records that Tankerkönig refused [key].
+     *
+     * Only [buildKey] is acted on. It is the one the user never chose and
+     * cannot replace from the settings screen, so forgetting it is what sends
+     * them to onboarding instead of leaving them with a banner and no way out.
+     * A rejected key they typed themselves stays: that one they can correct.
+     */
+    suspend fun reportRejected(key: ApiKey) {
+        if (buildKey == null || key != buildKey) return
+        dataStore.edit { it[REJECTED_BUILD_KEY] = key.value }
+    }
+
     companion object {
         val API_KEY = stringPreferencesKey("api_key")
+
+        /** The build key that stopped working, kept in plaintext - it is public anyway. */
+        val REJECTED_BUILD_KEY = stringPreferencesKey("rejected_build_key")
     }
 }

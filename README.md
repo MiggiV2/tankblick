@@ -6,7 +6,7 @@ E5, E10 und Diesel aus der [Tankerkönig-API](https://creativecommons.tankerkoen
 
 > **Status:** 0.2.0. Onboarding, Umkreissuche, Favoriten, Detailansicht,
 > Navigation und Einstellungen sind implementiert und getestet
-> (178 Unit-Tests, 26 instrumentierte Tests).
+> (203 Unit-Tests, 26 instrumentierte Tests).
 
 ## Warum noch eine Tankpreis-App?
 
@@ -69,9 +69,14 @@ Manifeste einfügt.
 
 ## API-Key
 
-Tankerkönig gibt keine App-weiten Schlüssel für Client-Apps aus, und ein in der
-APK versteckter Key wäre ohnehin extrahierbar. Deshalb bringt **jede Nutzerin
-und jeder Nutzer den eigenen Key mit**:
+Builds mit einkompiliertem Key — dazu gehört der aus F-Droid — laufen ohne
+Onboarding los. Wird dieser Key von Tankerkönig abgelehnt (`ok: false` oder
+HTTP 401/403), merkt sich die App genau diesen Key als tot, schickt dich ins
+Onboarding und schreibt dort hin, warum. Ein eigener Key hat immer Vorrang und
+wird nie verworfen.
+
+Ohne einkompilierten Key bringt **jede Nutzerin und jeder Nutzer den eigenen
+Key mit** — Tankerkönig gibt keine App-weiten Schlüssel für Client-Apps aus:
 
 1. Auf <https://onboarding.tankerkoenig.de/> registrieren.
    Pflichtangaben sind Vorname, Nachname und E-Mail-Adresse.
@@ -93,6 +98,7 @@ Wer selbst baut, kann den eigenen Key mitkompilieren und das Onboarding
 
 Ohne die Option bleibt `BuildConfig.API_KEY` leer und die App fragt wie gehabt
 nach einem Key. Ein in den Einstellungen eingetragener Key hat immer Vorrang.
+Genau diesen Weg nutzt auch die F-Droid-Rezeptur, dort über `gradleprops`.
 
 **Nicht in die committete `gradle.properties` schreiben** und ein so gebautes APK
 nicht weitergeben: der Key steht im Klartext in der APK und ist mit `strings` in

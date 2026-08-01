@@ -172,4 +172,65 @@ class ApiKeyStoreTest {
         store.save(validKey)
         assertEquals(validKey, store.userApiKey.first())
     }
+
+    /**
+     * A build key the API has stopped accepting leaves the app with nothing to
+     * work with, and nobody can fix it from inside: the user never entered it
+     * and cannot replace what they were not asked for. Forgetting it is what
+     * puts onboarding back in front of them.
+     */
+    @Test
+    fun `stops using the build key once the api rejects it`() = runTest {
+        val store = ApiKeyStore(dataStore, cipher, buildKey)
+
+        store.reportRejected(buildKey)
+
+        assertNull(store.apiKey.first())
+    }
+
+    /** A rejection of the user's own key is theirs to fix, so it stays. */
+    @Test
+    fun `keeps the stored key when the api rejects it`() = runTest {
+        val store = ApiKeyStore(dataStore, cipher, buildKey)
+        store.save(validKey)
+
+        store.reportRejected(validKey)
+
+        assertEquals(validKey, store.apiKey.first())
+    }
+
+    @Test
+    fun `uses the key the user enters after the build key was rejected`() = runTest {
+        val store = ApiKeyStore(dataStore, cipher, buildKey)
+        store.reportRejected(buildKey)
+
+        store.save(validKey)
+
+        assertEquals(validKey, store.apiKey.first())
+    }
+
+    /**
+     * The rejection is pinned to the key that failed rather than to "this build
+     * has a key". An update shipping a working one must not stay locked out by
+     * a flag its predecessor wrote.
+     */
+    @Test
+    fun `a newer build key is unaffected by an earlier rejection`() = runTest {
+        ApiKeyStore(dataStore, cipher, buildKey).reportRejected(buildKey)
+
+        val updated = ApiKeyStore(dataStore, cipher, validKey)
+
+        assertEquals(validKey, updated.apiKey.first())
+    }
+
+    /** Nothing to forget, and nothing that should disturb a working key. */
+    @Test
+    fun `ignores a rejection for a key the app is not using`() = runTest {
+        val store = ApiKeyStore(dataStore, cipher, buildKey)
+        val stranger = ApiKey.parse("aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee")!!
+
+        store.reportRejected(stranger)
+
+        assertEquals(buildKey, store.apiKey.first())
+    }
 }

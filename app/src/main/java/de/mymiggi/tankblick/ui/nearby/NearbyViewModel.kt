@@ -116,6 +116,8 @@ class NearbyViewModel(
                 radiusKm = settings.radiusKm,
             )
 
+            if (result is ApiResult.InvalidKey) apiKeyStore.reportRejected(apiKey)
+
             transientState.value = TransientState(message = result.toMessage())
         }
     }

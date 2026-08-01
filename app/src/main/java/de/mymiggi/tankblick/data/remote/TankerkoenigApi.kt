@@ -113,10 +113,15 @@ class TankerkoenigApi(
         block: io.ktor.client.request.HttpRequestBuilder.() -> Unit,
     ): ApiResult<T> = try {
         val response: HttpResponse = httpClient.get(url) { block() }
-        if (response.status.isSuccess()) {
-            ApiResult.Success(response.body<T>())
-        } else {
-            ApiResult.ServerError(response.status.value)
+        when {
+            response.status.isSuccess() -> ApiResult.Success(response.body<T>())
+
+            // The documented rejection is a 200 with ok:false, but a key that
+            // was deactivated rather than mistyped can also come back as a bare
+            // 401 or 403. Same problem for the user, so same answer.
+            response.status.value in KEY_REJECTED_STATUSES -> ApiResult.InvalidKey
+
+            else -> ApiResult.ServerError(response.status.value)
         }
     } catch (e: IOException) {
         ApiResult.Offline
@@ -165,6 +170,9 @@ class TankerkoenigApi(
 
         /** Hard limit of prices.php. */
         const val MAX_IDS_PER_PRICE_REQUEST = 10
+
+        /** Statuses that mean "not your key", as opposed to "not your day". */
+        private val KEY_REJECTED_STATUSES = setOf(401, 403)
 
         private const val TYPE_ALL = "all"
         private const val SORT_BY_DISTANCE = "dist"

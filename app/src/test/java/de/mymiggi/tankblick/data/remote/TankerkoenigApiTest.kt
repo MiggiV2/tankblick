@@ -132,6 +132,34 @@ class TankerkoenigApiTest {
         assertEquals(ApiResult.ServerError(503), result)
     }
 
+    /**
+     * The documented rejection is HTTP 200 with `ok: false`, but a key that has
+     * been deactivated rather than mistyped can also come back as a bare 401 or
+     * 403. Both mean the same thing to the user, so both have to end up at
+     * onboarding instead of at "the server is having a bad day".
+     */
+    @Test
+    fun `treats an unauthorised response as a rejected key`() = runTest {
+        val api = api { respondError(HttpStatusCode.Unauthorized) }
+
+        assertEquals(ApiResult.InvalidKey, api.findNearby(key, 52.52, 13.44, 5))
+    }
+
+    @Test
+    fun `treats a forbidden response as a rejected key`() = runTest {
+        val api = api { respondError(HttpStatusCode.Forbidden) }
+
+        assertEquals(ApiResult.InvalidKey, api.stationDetail(key, "abc"))
+    }
+
+    /** Any other 4xx is our own bug and must not throw the key away. */
+    @Test
+    fun `keeps other client errors as server errors`() = runTest {
+        val api = api { respondError(HttpStatusCode.NotFound) }
+
+        assertEquals(ApiResult.ServerError(404), api.findNearby(key, 52.52, 13.44, 5))
+    }
+
     @Test
     fun `maps a connection failure to offline`() = runTest {
         val api = api { throw IOException("no route to host") }
