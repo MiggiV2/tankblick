@@ -1,0 +1,39 @@
+name: Build Tankblick
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build:
+    runs-on: docker
+    # A clean build is a couple of minutes; anything near this is a hung runner
+    # holding up the queue rather than a slow build.
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: https://github.com/actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      # Installs the command line tools and accepts the licences. The platform
+      # and build tools themselves are left to AGP, which downloads exactly the
+      # versions the build asks for instead of a list kept in sync by hand.
+      - name: Set up Android SDK
+        uses: https://github.com/android-actions/setup-android@v3
+        with:
+          packages: ''
+
+      - name: Run unit tests
+        run: ./gradlew testDebugUnitTest
+
+      - name: Run lint
+        run: ./gradlew lint
+
+      - name: Assemble debug APK
+        run: ./gradlew assembleDebug
