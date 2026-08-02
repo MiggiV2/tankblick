@@ -169,32 +169,52 @@ Tankerkönig-API, deren Serverseite nicht offen ist, und es gibt keine freie
 Alternative, auf die sie ausweichen könnte. Dieselbe Einstufung hat
 `org.woheller69.spritpreise`, das die gleiche API nutzt.
 
-### Mitgelieferter API-Key
+### Kein mitgelieferter API-Key
 
-Damit F-Droid-Nutzerinnen nicht durchs Onboarding müssen, wird ein Key beim
-Bauen einkompiliert — über `gradleprops` in der Rezeptur:
+Die Rezeptur setzt **kein** `gradleprops` und backt keinen Key ein. Ein Key in
+einer öffentlich heruntergeladenen APK ist nach dem ersten `strings` bekannt,
+und sein Rate-Limit von einem Request pro Minute teilen sich dann alle Nutzer.
+F-Droid-Builds starten deshalb im Onboarding.
 
-```yaml
-    gradleprops:
-      - tankblick.apiKey=<uuid>
+`BuildConfig.API_KEY` bleibt dabei leer — der Gradle-Build kommt ohne die
+Property aus. Sollte doch einmal ein Key mitgeliefert werden und die API ihn
+später sperren, antwortet sie mit `ok: false` (oder 401/403); die App merkt sich
+genau diesen Key als abgelehnt und fällt aufs Onboarding zurück. Ein Key, den
+die Nutzerin selbst eingetragen hat, gewinnt immer und wird nie verworfen.
+
+### Was der F-Droid-Scanner nicht durchlässt
+
+`fdroid build` scannt den Quelltext, bevor er baut, und bricht bei Werkzeugen
+ab, die zur Buildzeit Binaries nachladen. Konkret aufgefallen:
+
+```
+ERROR: Found usual suspect 'org.gradle.toolchains.foojay-resolver' at settings.gradle.kts
 ```
 
-Wird der Key später gesperrt, antwortet die API mit `ok: false` (oder 401/403).
-Die App merkt sich genau diesen Key als abgelehnt, fällt auf das Onboarding
-zurück und erklärt dort, warum. Ein Key, den die Nutzerin selbst eingetragen
-hat, gewinnt immer und wird nie verworfen.
+Der foojay-Resolver lädt JDKs von `api.foojay.io`. Er ist samt der von ihm
+erzeugten `gradle/gradle-daemon-jvm.properties` aus dem Projekt entfernt; das
+Projekt braucht keine Toolchain-Provisionierung, `compileOptions` steht auf
+Java 17 und der Buildserver bringt sein eigenes JDK mit. Neue Plugins vor einem
+Release gegen `fdroid build` prüfen, nicht erst in der fdroiddata-CI.
 
-### Offen vor der Einreichung
+### Vor der Einreichung
 
 - [ ] Tag `v<versionName>` anlegen und pushen — ohne ihn ist `commit:` ins Leere
       gezeigt und die fdroiddata-CI schlägt fehl.
 - [ ] `commit:` auf den vollen Hash setzen, nicht auf den Tag-Namen. Die
       F-Droid-Maintainer bestehen bei neuen Apps darauf.
-- [ ] Dummy-Key `00000000-0000-0000-0000-000000000000` in `gradleprops` durch
-      den echten Key ersetzen.
-- [ ] Build lokal gegenprüfen: `fdroid build de.mymiggi.tankblick`. AGP 9.x,
-      Gradle 9.5 und compileSdk 37 sind neu genug, dass der Buildserver
-      stolpern kann.
+- [ ] Build lokal gegenprüfen. AGP 9.x, Gradle 9.5 und compileSdk 37 sind neu
+      genug, dass der Buildserver stolpern kann:
+
+      ```sh
+      docker run --rm -v "$PWD":/repo -w /repo \
+        registry.gitlab.com/fdroid/docker-executable-fdroidserver:master \
+        build --no-tarball -v de.mymiggi.tankblick:<versionCode>
+      ```
+
+      Im fdroiddata-Klon ausführen, nicht hier. `lint` und `rewritemeta` aus
+      demselben Image laufen lassen — die CI prüft, dass `rewritemeta` keine
+      Änderung mehr erzeugt.
 
 ## Nach dem Release
 

@@ -98,7 +98,9 @@ Wer selbst baut, kann den eigenen Key mitkompilieren und das Onboarding
 
 Ohne die Option bleibt `BuildConfig.API_KEY` leer und die App fragt wie gehabt
 nach einem Key. Ein in den Einstellungen eingetragener Key hat immer Vorrang.
-Genau diesen Weg nutzt auch die F-Droid-Rezeptur, dort über `gradleprops`.
+Der F-Droid-Build backt bewusst keinen Key ein: ein geteilter Key wäre nach dem
+ersten Download ausgelesen und sein Rate-Limit von allen Nutzern zugleich
+verbraucht. Aus F-Droid installierte Builds starten deshalb im Onboarding.
 
 **Nicht in die committete `gradle.properties` schreiben** und ein so gebautes APK
 nicht weitergeben: der Key steht im Klartext in der APK und ist mit `strings` in
