@@ -26,24 +26,14 @@ plugins {
  * meant to be public and whose rate limit you are willing to share.
  *
  * Read through providers so the configuration cache invalidates when the value
- * changes, and validated here so a typo fails the build instead of every
- * request at runtime. The key itself is kept out of the message: build logs get
- * pasted into issues.
+ * changes. [TankblickApiKey] does the validating and accepts the reversed
+ * base64 spelling the F-Droid recipe uses.
  */
-val buildApiKey: String = providers.gradleProperty("tankblick.apiKey")
-    .orElse(providers.environmentVariable("TANKBLICK_API_KEY"))
-    .getOrElse("")
-    .trim()
-    .lowercase()
-
-require(
-    buildApiKey.isEmpty() ||
-        Regex("^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$")
-            .matches(buildApiKey),
-) {
-    "tankblick.apiKey is not a Tankerkoenig API key. Expected a UUID like " +
-        "00000000-0000-0000-0000-000000000002, got ${buildApiKey.length} characters."
-}
+val buildApiKey: String = TankblickApiKey.resolve(
+    providers.gradleProperty("tankblick.apiKey")
+        .orElse(providers.environmentVariable("TANKBLICK_API_KEY"))
+        .getOrElse(""),
+)
 
 android {
     namespace = "de.mymiggi.tankblick"

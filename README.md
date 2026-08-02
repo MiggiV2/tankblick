@@ -98,9 +98,16 @@ Wer selbst baut, kann den eigenen Key mitkompilieren und das Onboarding
 
 Ohne die Option bleibt `BuildConfig.API_KEY` leer und die App fragt wie gehabt
 nach einem Key. Ein in den Einstellungen eingetragener Key hat immer Vorrang.
-Der F-Droid-Build backt bewusst keinen Key ein: ein geteilter Key wäre nach dem
-ersten Download ausgelesen und sein Rate-Limit von allen Nutzern zugleich
-verbraucht. Aus F-Droid installierte Builds starten deshalb im Onboarding.
+
+Neben der nackten UUID wird ein zweite Schreibweise akzeptiert: base64-kodiert
+und dann rückwärts. Genau die steht in der F-Droid-Rezeptur, weil fdroiddata
+öffentlich ist und fleißig durchsucht wird — eine UUID im Klartext wäre dort
+über kurz oder lang abgegriffen. Schutz ist das keiner, aus der APK liest sie
+jeder mit `strings` heraus; es hält nur die Metadaten uninteressant.
+
+```sh
+printf %s "<uuid>" | base64 | rev
+```
 
 **Nicht in die committete `gradle.properties` schreiben** und ein so gebautes APK
 nicht weitergeben: der Key steht im Klartext in der APK und ist mit `strings` in

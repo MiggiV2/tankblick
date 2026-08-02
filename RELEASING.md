@@ -169,18 +169,42 @@ Tankerkönig-API, deren Serverseite nicht offen ist, und es gibt keine freie
 Alternative, auf die sie ausweichen könnte. Dieselbe Einstufung hat
 `org.woheller69.spritpreise`, das die gleiche API nutzt.
 
-### Kein mitgelieferter API-Key
+### Mitgelieferter API-Key
 
-Die Rezeptur setzt **kein** `gradleprops` und backt keinen Key ein. Ein Key in
-einer öffentlich heruntergeladenen APK ist nach dem ersten `strings` bekannt,
-und sein Rate-Limit von einem Request pro Minute teilen sich dann alle Nutzer.
-F-Droid-Builds starten deshalb im Onboarding.
+Damit F-Droid-Nutzerinnen nicht auf die Freigabe eines eigenen Keys warten
+müssen — die dauert Tage —, wird ein Key beim Bauen einkompiliert, über
+`gradleprops` in der Rezeptur. `org.woheller69.spritpreise` macht das seit v1.5
+genauso.
 
-`BuildConfig.API_KEY` bleibt dabei leer — der Gradle-Build kommt ohne die
-Property aus. Sollte doch einmal ein Key mitgeliefert werden und die API ihn
-später sperren, antwortet sie mit `ok: false` (oder 401/403); die App merkt sich
-genau diesen Key als abgelehnt und fällt aufs Onboarding zurück. Ein Key, den
-die Nutzerin selbst eingetragen hat, gewinnt immer und wird nie verworfen.
+Der Wert steht dort **nicht** als UUID, sondern base64-kodiert und rückwärts.
+fdroiddata ist öffentlich und wird fleißig durchsucht; eine UUID im Klartext
+wäre über kurz oder lang abgegriffen. Aus der APK liest den Key ohnehin jeder
+mit `strings` — die Verschleierung hält nur die Metadaten uninteressant.
+
+```sh
+printf %s "<uuid>" | base64 | rev
+```
+
+```yaml
+    gradleprops:
+      - tankblick.apiKey=<ausgabe von oben>
+```
+
+`TankblickApiKey.resolve` in `buildSrc/` nimmt beide Schreibweisen an und lehnt
+alles andere ab, damit ein Tippfehler den Build kippt statt jede Anfrage zur
+Laufzeit. Die Tests dazu laufen bei jedem Gradle-Aufruf mit, auch auf dem
+F-Droid-Buildserver.
+
+Wird der Key später gesperrt, antwortet die API mit `ok: false` (oder 401/403).
+Die App merkt sich genau diesen Key als abgelehnt, fällt auf das Onboarding
+zurück und erklärt dort, warum. Ein Key, den die Nutzerin selbst eingetragen
+hat, gewinnt immer und wird nie verworfen.
+
+Das Rate-Limit von einem Request pro Minute gilt **pro Key**, unsere Drosselung
+dagegen pro Installation. Bei vielen gleichzeitigen Nutzerinnen läuft der
+geteilte Key also ins Limit. Falls Tankerkönig deshalb sperrt: einen
+Anwendungs-Key mit eigenem Kontingent anfragen und in der nächsten Version
+tauschen — der Rückfallpfad oben trägt die Zeit dazwischen.
 
 ### Was der F-Droid-Scanner nicht durchlässt
 
@@ -203,6 +227,8 @@ Release gegen `fdroid build` prüfen, nicht erst in der fdroiddata-CI.
       gezeigt und die fdroiddata-CI schlägt fehl.
 - [ ] `commit:` auf den vollen Hash setzen, nicht auf den Tag-Namen. Die
       F-Droid-Maintainer bestehen bei neuen Apps darauf.
+- [ ] `gradleprops` mitnehmen — ein neuer Build-Eintrag ohne die Zeile liefert
+      eine Version aus, die im Onboarding startet statt sofort zu laufen.
 - [ ] Build lokal gegenprüfen. AGP 9.x, Gradle 9.5 und compileSdk 37 sind neu
       genug, dass der Buildserver stolpern kann:
 
