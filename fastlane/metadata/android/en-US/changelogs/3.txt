@@ -1,0 +1,2 @@
+Fixed: a device set to a language other than German or English now shows the
+app in English instead of German.

@@ -1,0 +1,2 @@
+Behoben: Geräte mit einer anderen Sprache als Deutsch oder Englisch zeigen die
+App jetzt auf Englisch statt auf Deutsch.

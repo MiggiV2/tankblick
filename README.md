@@ -43,8 +43,9 @@ E5, E10 und Diesel aus der [Tankerkönig-API](https://creativecommons.tankerkoen
 - **Selbst auferlegtes Rate-Limiting:** 60 s zwischen Refreshes, 2 s Debounce
   für Detailabfragen, Radius auf 25 km gedeckelt. Die Wartezeit wird persistiert
   und übersteht einen App-Neustart.
-- Deutsch ist die Standard-Locale (`values/`), Englisch liegt in
-  `values-en/`.
+- Englisch ist die Standard-Locale (`values/`), Deutsch liegt in `values-de/`.
+  Ein Gerät mit einer nicht unterstützten Sprache bekommt damit Englisch statt
+  Deutsch.
 
 ## Datenschutz
 

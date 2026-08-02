@@ -1,135 +1,140 @@
-<resources xmlns:tools="http://schemas.android.com/tools">
+<resources xmlns:tools="http://schemas.android.com/tools" tools:locale="en">
+    <!--
+        English is the default locale: a device set to a language the app does
+        not speak falls back to values/, and F-Droid asks that this be English
+        rather than the author's own language. German, the language of the
+        users this app is aimed at, lives in values-de/.
+    -->
+
     <!-- A proper noun, and a UUID pattern: neither is translated. -->
     <string name="app_name" translatable="false">Tankblick</string>
 
     <!-- Required by the CC BY 4.0 licence of the MTS-K price data. -->
-    <string name="attribution_short">Preisdaten: Tankerkönig / MTS-K, CC BY 4.0</string>
+    <string name="attribution_short">Price data: Tankerkönig / MTS-K, CC BY 4.0</string>
 
     <!-- Onboarding -->
-    <string name="onboarding_title">API-Key einrichten</string>
-    <string name="onboarding_why">Tankblick holt die Spritpreise direkt bei Tankerkönig. Dafür brauchst du einen eigenen, kostenlosen API-Key. Einen Schlüssel in die App einzubauen wäre keine Lösung: Er ließe sich aus jeder APK auslesen und wäre schnell gesperrt.</string>
-    <string name="onboarding_steps">1. Auf onboarding.tankerkoenig.de registrieren — Pflichtangaben sind Vorname, Nachname und E-Mail-Adresse.\n2. Der Key wird von Hand geprüft, das kann einige Tage dauern.\n3. Key hier eintragen.</string>
-    <string name="onboarding_open_registration">Key beantragen</string>
-    <string name="onboarding_key_label">API-Key</string>
+    <string name="onboarding_title">Set up your API key</string>
+    <string name="onboarding_why">Tankblick fetches fuel prices straight from Tankerkönig, which needs your own free API key. Shipping one inside the app would not work: it could be extracted from any APK and would be blocked in no time.</string>
+    <string name="onboarding_steps">1. Register at onboarding.tankerkoenig.de — first name, last name and email address are required.\n2. Keys are reviewed by hand, which can take a few days.\n3. Enter the key here.</string>
+    <string name="onboarding_open_registration">Request a key</string>
+    <string name="onboarding_key_label">API key</string>
     <string name="onboarding_key_placeholder" translatable="false" tools:ignore="TypographyDashes">00000000-0000-0000-0000-000000000000</string>
-    <string name="onboarding_key_hint">Ein Key sieht aus wie eine UUID.</string>
-    <string name="onboarding_key_invalid">Das sieht nicht nach einem Tankerkönig-Key aus. Erwartet wird eine UUID mit 36 Zeichen.</string>
-    <string name="onboarding_save">Key speichern</string>
-    <string name="onboarding_use_demo_key">Erstmal mit Demo-Key ausprobieren</string>
-    <string name="onboarding_build_key_rejected">Der Key, der mit dieser App-Version ausgeliefert wurde, wird von Tankerkönig nicht mehr akzeptiert. Trag bitte einen eigenen ein — oder probier es solange mit dem Demo-Key.</string>
-    <string name="onboarding_privacy_note">Der Key bleibt auf diesem Gerät: verschlüsselt im Android-Keystore, ausgenommen von Cloud-Backup und Geräteübertragung.</string>
+    <string name="onboarding_key_hint">A key looks like a UUID.</string>
+    <string name="onboarding_key_invalid">That does not look like a Tankerkönig key. A 36-character UUID is expected.</string>
+    <string name="onboarding_save">Save key</string>
+    <string name="onboarding_use_demo_key">Try it with the demo key first</string>
+    <string name="onboarding_build_key_rejected">Tankerkönig no longer accepts the key that shipped with this version of the app. Please enter your own — or use the demo key in the meantime.</string>
+    <string name="onboarding_privacy_note">The key stays on this device: encrypted in the Android Keystore, and excluded from cloud backup and device transfer.</string>
 
     <!-- Fuel types and sorting -->
     <string name="fuel_e5">Super E5</string>
     <string name="fuel_e10">Super E10</string>
     <string name="fuel_diesel">Diesel</string>
-    <string name="sort_price">Nach Preis</string>
-    <string name="sort_distance">Nach Entfernung</string>
+    <string name="sort_price">By price</string>
+    <string name="sort_distance">By distance</string>
 
     <!-- Station list -->
-    <string name="station_open">geöffnet</string>
-    <string name="station_closed">geschlossen</string>
-    <string name="price_unavailable">kein Preis</string>
-    <string name="price_spoken">%1$s Euro pro Liter</string>
-    <string name="favorite_add">Zu Favoriten hinzufügen</string>
-    <string name="favorite_remove">Aus Favoriten entfernen</string>
-    <string name="nearby_empty_title">Noch keine Tankstellen</string>
-    <string name="nearby_empty_body">Starte eine Umkreissuche, um Preise in deiner Nähe zu sehen. Tankblick fragt nur dann Daten ab — nie im Hintergrund.</string>
+    <string name="station_open">open</string>
+    <string name="station_closed">closed</string>
+    <string name="price_unavailable">no price</string>
+    <string name="price_spoken">%1$s euros per litre</string>
+    <string name="favorite_add">Add to favourites</string>
+    <string name="favorite_remove">Remove from favourites</string>
+    <string name="nearby_empty_title">No stations yet</string>
+    <string name="nearby_empty_body">Start a search to see prices near you. Tankblick only fetches data when you ask it to — never in the background.</string>
 
     <!-- Tabs and navigation -->
-    <string name="tab_nearby">In der Nähe</string>
-    <string name="tab_favorites">Favoriten</string>
-    <string name="action_back">Zurück</string>
+    <string name="tab_nearby">Nearby</string>
+    <string name="tab_favorites">Favourites</string>
+    <string name="tab_settings">Settings</string>
+    <string name="action_back">Back</string>
 
-    <!-- Favorites -->
-    <string name="favorites_empty_title">Noch keine Favoriten</string>
-    <string name="favorites_empty_body">Tippe in der Liste auf das Herz, um eine Tankstelle zu merken. Favoriten lassen sich mit einer einzigen Abfrage aktualisieren — egal wie viele es sind.</string>
+    <!-- Favourites -->
+    <string name="favorites_empty_title">No favourites yet</string>
+    <string name="favorites_empty_body">Tap the heart in the list to remember a station. Favourites refresh in a single request, however many there are.</string>
 
     <!-- Detail -->
-    <string name="detail_unknown_station">Zu dieser Tankstelle liegen keine Daten vor.</string>
-    <string name="detail_opening_hours">Öffnungszeiten</string>
-    <string name="detail_opening_hours_loading">werden geladen …</string>
-    <string name="detail_opening_hours_unknown">Keine Öffnungszeiten hinterlegt.</string>
-    <string name="detail_open_all_day">Durchgehend geöffnet</string>
-    <string name="detail_label">Eigener Name</string>
-    <string name="detail_label_hint">Zum Beispiel „Zuhause“ oder „Arbeit“.</string>
-    <string name="navigate_no_app">Keine App gefunden, die Navigation übernehmen kann. Organic Maps und OsmAnd gibt es bei F-Droid.</string>
-    <string name="action_navigate">Navigieren</string>
+    <string name="detail_unknown_station">No data available for this station.</string>
+    <string name="detail_opening_hours">Opening hours</string>
+    <string name="detail_opening_hours_loading">loading …</string>
+    <string name="detail_opening_hours_unknown">No opening hours published.</string>
+    <string name="detail_open_all_day">Open around the clock</string>
+    <string name="detail_label">Your own name</string>
+    <string name="detail_label_hint">For example “Home” or “Work”.</string>
+    <string name="navigate_no_app">No app found that can handle navigation. Organic Maps and OsmAnd are both on F-Droid.</string>
+    <string name="action_navigate">Navigate</string>
 
     <!-- Settings -->
-    <string name="tab_settings">Einstellungen</string>
-    <string name="settings_appearance">Darstellung</string>
+    <string name="settings_appearance">Appearance</string>
     <string name="settings_dark_system">System</string>
-    <string name="settings_dark_light">Hell</string>
-    <string name="settings_dark_dark">Dunkel</string>
-    <string name="settings_color_scheme">Farbschema</string>
-    <string name="settings_scheme_dynamic">Dynamisch (Hintergrundbild)</string>
+    <string name="settings_dark_light">Light</string>
+    <string name="settings_dark_dark">Dark</string>
+    <string name="settings_color_scheme">Colour scheme</string>
+    <string name="settings_scheme_dynamic">Dynamic (wallpaper)</string>
     <string name="settings_scheme_petrol">Petrol</string>
-    <string name="settings_scheme_forest">Wald</string>
-    <string name="settings_scheme_amber">Bernstein</string>
-    <string name="settings_scheme_plum">Pflaume</string>
-    <string name="settings_radius">Suchradius</string>
+    <string name="settings_scheme_forest">Forest</string>
+    <string name="settings_scheme_amber">Amber</string>
+    <string name="settings_scheme_plum">Plum</string>
+    <string name="settings_radius">Search radius</string>
     <plurals name="settings_radius_value">
-        <item quantity="one">%1$d Kilometer</item>
-        <item quantity="other">%1$d Kilometer</item>
+        <item quantity="one">%1$d kilometre</item>
+        <item quantity="other">%1$d kilometres</item>
     </plurals>
-    <string name="settings_radius_hint">Tankerkönig erlaubt höchstens 25 km. Gilt ab der nächsten Suche.</string>
-    <string name="settings_nav_app">Navi-App</string>
-    <string name="settings_nav_app_ask">Jedes Mal fragen</string>
-    <string name="settings_nav_app_none">Es ist keine App installiert, die Navigation übernehmen kann. Organic Maps und OsmAnd gibt es bei F-Droid.</string>
-    <string name="settings_api_key">API-Key</string>
-    <string name="settings_api_key_none">Kein Key hinterlegt</string>
-    <string name="settings_api_key_demo">Das ist der Demo-Key. Er liefert Beispieldaten, keine echten Preise.</string>
-    <string name="settings_api_key_replace">Key ersetzen</string>
-    <string name="settings_api_key_forget">Key löschen</string>
-    <string name="settings_api_key_build">Mit dieser App-Version ausgeliefert. Du kannst einen eigenen Key eintragen, der dann verwendet wird.</string>
-    <string name="settings_about">Über Tankblick</string>
-    <string name="settings_privacy_title">Datenschutz</string>
-    <string name="settings_privacy_body">Tankblick spricht mit genau einem Server: creativecommons.tankerkoenig.de. Kein Konto, kein Tracking, keine Analytics, keine Werbung.
-
-Dein Standort verlässt das Gerät nur als Koordinatenpaar in einer Umkreissuche, die du selbst auslöst — nie im Hintergrund. Der API-Key liegt verschlüsselt im Android-Keystore und ist vom Backup ausgenommen. Favoriten, Einstellungen und Preise bleiben lokal; Preisverlauf wird nach 30 Tagen gelöscht.</string>
+    <string name="settings_radius_hint">Tankerkönig allows at most 25 km. Takes effect on the next search.</string>
+    <string name="settings_nav_app">Navigation app</string>
+    <string name="settings_nav_app_ask">Ask every time</string>
+    <string name="settings_nav_app_none">No installed app can handle navigation. Organic Maps and OsmAnd are both on F-Droid.</string>
+    <string name="settings_api_key">API key</string>
+    <string name="settings_api_key_none">No key stored</string>
+    <string name="settings_api_key_demo">This is the demo key. It returns sample data, not real prices.</string>
+    <string name="settings_api_key_replace">Replace key</string>
+    <string name="settings_api_key_forget">Delete key</string>
+    <string name="settings_api_key_build">Shipped with this version of the app. You can enter your own key, which then takes precedence.</string>
+    <string name="settings_about">About Tankblick</string>
+    <string name="settings_privacy_title">Privacy</string>
+    <string name="settings_privacy_body">Tankblick talks to exactly one server: creativecommons.tankerkoenig.de. No account, no tracking, no analytics, no ads.\n\nYour location leaves the device only as a coordinate pair in a search you started yourself — never in the background. The API key is encrypted in the Android Keystore and excluded from backups. Favourites, settings and prices stay local; price history is deleted after 30 days.</string>
     <string name="settings_version">Version %1$s</string>
-    <string name="settings_licence">Tankblick steht unter der GPL-3.0-or-later.</string>
+    <string name="settings_licence">Tankblick is licensed under the GPL-3.0-or-later.</string>
     <string name="settings_open_tankerkoenig">Tankerkönig</string>
     <string name="settings_open_licence">CC BY 4.0</string>
-    <string name="action_cancel">Abbrechen</string>
+    <string name="action_cancel">Cancel</string>
 
     <!-- Freshness -->
-    <string name="last_updated">Stand: %1$s</string>
-    <string name="age_just_now">gerade eben</string>
+    <string name="last_updated">As of %1$s</string>
+    <string name="age_just_now">just now</string>
     <plurals name="age_minutes">
-        <item quantity="one">vor %1$d Minute</item>
-        <item quantity="other">vor %1$d Minuten</item>
+        <item quantity="one">%1$d minute ago</item>
+        <item quantity="other">%1$d minutes ago</item>
     </plurals>
     <plurals name="age_hours">
-        <item quantity="one">vor %1$d Stunde</item>
-        <item quantity="other">vor %1$d Stunden</item>
+        <item quantity="one">%1$d hour ago</item>
+        <item quantity="other">%1$d hours ago</item>
     </plurals>
     <plurals name="age_days">
-        <item quantity="one">vor %1$d Tag</item>
-        <item quantity="other">vor %1$d Tagen</item>
+        <item quantity="one">%1$d day ago</item>
+        <item quantity="other">%1$d days ago</item>
     </plurals>
 
     <!-- Actions -->
-    <string name="action_retry">Erneut versuchen</string>
-    <string name="action_dismiss">Ausblenden</string>
-    <string name="action_grant_permission">Standort freigeben</string>
-    <string name="action_open_location_settings">Einstellungen öffnen</string>
-    <string name="action_search_nearby">In der Nähe suchen</string>
+    <string name="action_retry">Try again</string>
+    <string name="action_dismiss">Dismiss</string>
+    <string name="action_grant_permission">Allow location</string>
+    <string name="action_open_location_settings">Open settings</string>
+    <string name="action_search_nearby">Search nearby</string>
 
     <!-- Messages -->
-    <string name="message_missing_api_key">Ohne API-Key kann Tankblick keine Preise abrufen.</string>
-    <string name="message_needs_location_permission">Für die Umkreissuche braucht Tankblick deinen ungefähren Standort. Er verlässt das Gerät nur als Koordinatenpaar im Request an Tankerkönig.</string>
-    <string name="message_location_disabled">Die Standortdienste sind ausgeschaltet.</string>
-    <string name="message_location_unavailable">Es ließ sich kein Standort ermitteln. Draußen oder in Fensternähe klappt es meist besser.</string>
-    <string name="message_no_results">Im gewählten Umkreis liegt keine Tankstelle.</string>
-    <string name="message_offline">Keine Verbindung. Angezeigt werden die zuletzt gespeicherten Preise.</string>
-    <string name="message_invalid_key">Der API-Key wurde abgelehnt. Prüfe ihn in den Einstellungen.</string>
+    <string name="message_missing_api_key">Without an API key Tankblick cannot fetch prices.</string>
+    <string name="message_needs_location_permission">A nearby search needs your approximate location. It leaves the device only as a coordinate pair in the request to Tankerkönig.</string>
+    <string name="message_location_disabled">Location services are switched off.</string>
+    <string name="message_location_unavailable">No position could be determined. Outdoors or near a window usually works better.</string>
+    <string name="message_no_results">There is no station within the chosen radius.</string>
+    <string name="message_offline">No connection. Showing the last prices that were saved.</string>
+    <string name="message_invalid_key">The API key was rejected. Check it in the settings.</string>
     <plurals name="message_rate_limited">
-        <item quantity="one">Tankerkönig erlaubt eine Abfrage pro Minute. Noch %1$d Sekunde.</item>
-        <item quantity="other">Tankerkönig erlaubt eine Abfrage pro Minute. Noch %1$d Sekunden.</item>
+        <item quantity="one">Tankerkönig allows one request per minute. %1$d second to go.</item>
+        <item quantity="other">Tankerkönig allows one request per minute. %1$d seconds to go.</item>
     </plurals>
-    <string name="message_server_error">Tankerkönig antwortet gerade nicht (Fehler %1$d).</string>
-    <string name="message_failed">Die Antwort war unbrauchbar.</string>
-    <string name="message_failed_with_detail">Tankerkönig meldet: %1$s</string>
+    <string name="message_server_error">Tankerkönig is not responding right now (error %1$d).</string>
+    <string name="message_failed">The response was unusable.</string>
+    <string name="message_failed_with_detail">Tankerkönig says: %1$s</string>
 </resources>
