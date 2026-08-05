@@ -1,5 +1,7 @@
 # Tankblick
 
+[<img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png" alt="Get it on F-Droid" height="80">](https://f-droid.org/packages/de.mymiggi.tankblick/)
+
 Schnelle, datensparsame Spritpreis-App für Deutschland. Zeigt aktuelle Preise für
 E5, E10 und Diesel aus der [Tankerkönig-API](https://creativecommons.tankerkoenig.de/)
 (Daten der Markttransparenzstelle für Kraftstoffe des Bundeskartellamts).
